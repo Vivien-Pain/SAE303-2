@@ -1,0 +1,17 @@
+{
+  "name": "test2",
+  "private": true,
+  "version": "0.0.0",
+  "type": "module",
+  "scripts": {
+    "dev": "vite",
+    "build": "vite build",
+    "preview": "vite preview"
+  },
+  "devDependencies": {
+    "gsap": "^3.13.0",
+    "prettier": "^3.6.2",
+    "vite": "^7.1.7",
+    "vite-plugin-static-copy": "^3.1.3"
+  }
+}

@@ -1,0 +1,509 @@
+{
+  "688548e4666873aa7a49491ba88a7271": {
+    "nom_court": "Comprendre",
+    "numero": 1,
+    "numero_identifiant": 1,
+    "libelle_long": "Comprendre les écosystèmes, les besoins des utilisateurs et les dispositifs de communication numérique",
+    "couleur": "c1",
+    "id": "688548e4666873aa7a49491ba88a7271",
+    "situations": [
+      "Prestataire : Les livrables constituent la première étape de la mission, qui se poursuit avec du conseil et de la production (agence de communication digitale, consultant...).",
+      "Organisation traditionnelle : Les livrables sont produits par les services de l’organisation qui peut être une entreprise, une administration ou une association.",
+      "Start-up : Les livrables sont utilisés de façon itérative pour améliorer le produit créé par l’organisation, amélioration pilotée par un product owner."
+    ],
+    "composantes_essentielles": [
+      "en intégrant les enjeux humains, écologiques et éthiques",
+      "en écoutant et observant les utilisateurs",
+      "en s’appuyant sur des données quantitatives pertinentes et des outils statistiques adaptés",
+      "en sollicitant des modèles théoriques issus des sciences humaines et sociales"
+    ],
+    "niveaux": [
+      {
+        "ordre": 1,
+        "libelle": "Comprendre les éléments de communication et les attentes utilisateurs",
+        "annee": "BUT1",
+        "acs": [
+          {
+            "code": "AC11.01",
+            "libelle": "Présenter une organisation, ses activités et son environnement (économique, sociologique, culturel, juridique, technologique, communicationnel et médiatique)"
+          },
+          {
+            "code": "AC11.02",
+            "libelle": "Évaluer un site web, un produit multimédia ou un dispositif interactif existant en s’appuyant sur des guides de bonnes pratiques"
+          },
+          {
+            "code": "AC11.03",
+            "libelle": "Produire des analyses statistiques descriptives et les interpréter pour évaluer un contexte socio-économique"
+          },
+          {
+            "code": "AC11.04",
+            "libelle": "Analyser des formes médiatiques et leur sémiotique"
+          },
+          {
+            "code": "AC11.05",
+            "libelle": "Identifier les cibles (critères socio-économiques, démographiques, géographiques, culturels...)"
+          },
+          {
+            "code": "AC11.06",
+            "libelle": "Réaliser des entretiens utilisateurs pour construire des personae et des récits utilisateurs (user stories)"
+          }
+        ]
+      },
+      {
+        "ordre": 2,
+        "libelle": "Comprendre la stratégie de communication et l’expérience utilisateur",
+        "annee": "BUT2",
+        "acs": [
+          {
+            "code": "AC21.01",
+            "libelle": "Analyser la stratégie de communication ou marketing d’un acteur, d’une organisation au regard d’un secteur ou d’un marché (stratégie, mission, valeurs...)"
+          },
+          {
+            "code": "AC21.02",
+            "libelle": "Auditer un site web, une marque ou un service, en termes de trafic et de référencement"
+          },
+          {
+            "code": "AC21.03",
+            "libelle": "Traiter des données avec des outils statistiques pour faciliter leur analyse et leur exploitation"
+          },
+          {
+            "code": "AC21.04",
+            "libelle": "Identifier et décrire les parcours client à partir d’enquêtes de terrain"
+          },
+          {
+            "code": "AC21.05",
+            "libelle": "Cartographier les expériences utilisateur : points de contact, points de friction et de satisfaction, carte d’empathie."
+          }
+        ]
+      }
+    ]
+  },
+  "786d957f2fd89908751ca0ea0a835a37": {
+    "nom_court": "Concevoir",
+    "numero": 2,
+    "numero_identifiant": 2,
+    "libelle_long": "Concevoir ou co-concevoir une réponse stratégique pertinente à une problématique complexe",
+    "couleur": "c2",
+    "id": "786d957f2fd89908751ca0ea0a835a37",
+    "situations": [
+      "Prestataire : Livrables sous forme de recommandation stratégique, dans une approche de communication ou de conception de produit / service.",
+      "Organisation traditionnelle : Direction marketing, communication, DPO, CRM… dans une entreprise, une administration ou une association.",
+      "Start-up : Les livrables sont utilisés de façon itérative pour améliorer le produit créé par l’organisation, amélioration pilotée par un product owner."
+    ],
+    "composantes_essentielles": [
+      "en optimisant la responsabilité sociale et environnementale de l’organisation",
+      "en s’intégrant aux écosystèmes physiques et numériques des parties prenantes",
+      "en s’appuyant sur les usages et les modes de communication observés",
+      "en enrichissant sa démarche de connaissances sociologiques, esthétiques, culturelles et inter-culturelles",
+      "en présentant de façon convaincante la réponse proposée, en français, en anglais ou dans d’autres langues"
+    ],
+    "niveaux": [
+      {
+        "ordre": 1,
+        "libelle": "Concevoir une réponse stratégique",
+        "annee": "BUT1",
+        "acs": [
+          {
+            "code": "AC12.01",
+            "libelle": "Concevoir un produit ou un service en terme d’usage et de fonctionnalité"
+          },
+          {
+            "code": "AC12.02",
+            "libelle": "Construire la proposition de valeur d’un produit ou d’un service"
+          },
+          {
+            "code": "AC12.03",
+            "libelle": "Proposer une recommandation marketing (cibles, objectifs, points de contact)"
+          },
+          {
+            "code": "AC12.04",
+            "libelle": "Proposer une stratégie de communication"
+          }
+        ]
+      },
+      {
+        "ordre": 2,
+        "libelle": "Co-concevoir une réponse stratégique",
+        "annee": "BUT2",
+        "acs": [
+          {
+            "code": "AC22.01",
+            "libelle": "Co-concevoir un produit ou un service (proposition de valeur, fonctionnalités...)"
+          },
+          {
+            "code": "AC22.02",
+            "libelle": "Produire une recommandation ergonomique à partir des tests utilisateurs (sur système fonctionnel, prototype ou maquette interactive)"
+          },
+          {
+            "code": "AC22.03",
+            "libelle": "Co-construire une recommandation stratégique (en structurant un plan d’action)"
+          },
+          {
+            "code": "AC22.04",
+            "libelle": "Optimiser le référencement d’un site web, d’un produit ou d’un service"
+          },
+          {
+            "code": "AC22.05",
+            "libelle": "Mettre en place une présence sur les réseaux sociaux"
+          }
+        ]
+      },
+      {
+        "ordre": 3,
+        "libelle": "Co-concevoir une réponse stratégique complexe et prospective",
+        "annee": "BUT3",
+        "acs": [
+          {
+            "code": "AC32.01",
+            "libelle": "Projeter les futurs possibles d’une organisation, d’une marque, d’un service, produit ou secteur (tendances, évolutions, scénarios prospectifs)"
+          },
+          {
+            "code": "AC32.02",
+            "libelle": "Co-construire un produit ou service de manière itérative (ateliers de créativité, idéation, définition de l’expérience utilisateur, exploitation des résultats de test)"
+          },
+          {
+            "code": "AC32.03",
+            "libelle": "Concevoir et mettre en oeuvre une communication 360, plurimédia ou transmédia"
+          },
+          {
+            "code": "AC32.04",
+            "libelle": "Construire des outils de validation et de suivi (flux, indicateurs de performance, tableaux de bord, référencement, engagement...)"
+          }
+        ]
+      }
+    ]
+  },
+  "6a5a25b106187717ff27758e789dbde8": {
+    "nom_court": "Exprimer",
+    "numero": 3,
+    "numero_identifiant": 3,
+    "libelle_long": "Exprimer un message avec les médias numériques pour informer et communiquer",
+    "couleur": "c3",
+    "id": "6a5a25b106187717ff27758e789dbde8",
+    "situations": [
+      "Prestataire : Création et réalisation de contenu multimédia dans une agence généraliste ou spécialisée (agence de communication digitale, studio graphique, studio digital, production de jeu vidéo, production vidéo…).",
+      "Organisation traditionnelle : Service intégré dans une entreprise, une administration ou une association : production interne et gestion des utilisateurs.",
+      "Start-up : Itérations continues : le discours s’adapte aux évolutions de l’entreprise, de son marché et de sa communauté."
+    ],
+    "composantes_essentielles": [
+      "en veillant à la qualité esthétique des créations et en la justifiant par des références culturelles et artistiques",
+      "en produisant un discours de qualité, appuyé sur les théories du récit et les traditions narratives",
+      "en respectant la stratégie de communication établie",
+      "en veillant à la qualité orthographique, grammaticale et typographique des productions",
+      "en communiquant en français, en anglais ou dans d’autres langues"
+    ],
+    "niveaux": [
+      {
+        "ordre": 1,
+        "libelle": "Exprimer un message par des productions simples",
+        "annee": "BUT1",
+        "acs": [
+          {
+            "code": "AC13.01",
+            "libelle": "Ecrire pour les médias numériques"
+          },
+          {
+            "code": "AC13.02",
+            "libelle": "Produire des pistes graphiques et des planches d’inspiration"
+          },
+          {
+            "code": "AC13.03",
+            "libelle": "Créer, composer et retoucher des visuels"
+          },
+          {
+            "code": "AC13.04",
+            "libelle": "Tourner et monter une vidéo (scénario, captation image et son...)"
+          },
+          {
+            "code": "AC13.05",
+            "libelle": "Designer une interface web (wireframes, UI)"
+          },
+          {
+            "code": "AC13.06",
+            "libelle": "Optimiser les médias en fonction de leurs usages et supports de diffusion"
+          }
+        ]
+      },
+      {
+        "ordre": 2,
+        "libelle": "Exprimer une identité visuelle et éditoriale transmédia",
+        "annee": "BUT2",
+        "acs": [
+          {
+            "code": "AC23.01",
+            "libelle": "Produire un écrit journalistique sourcé et documenté"
+          },
+          {
+            "code": "AC23.02",
+            "libelle": "Définir une iconographie (illustrations, photographies, vidéos)"
+          },
+          {
+            "code": "AC23.03",
+            "libelle": "Créer et décliner une identité visuelle (charte graphique)"
+          },
+          {
+            "code": "AC23.04",
+            "libelle": "Imaginer, écrire et scénariser en vue d’une communication multimédia ou transmédia"
+          },
+          {
+            "code": "AC23.05",
+            "libelle": "Réaliser, composer et produire pour une communication plurimédia"
+          },
+          {
+            "code": "AC23.06",
+            "libelle": "Élaborer et produire des animations, des designs sonores, des effets spéciaux, de la visualisation de données ou de la 3D"
+          }
+        ]
+      },
+      {
+        "ordre": 3,
+        "libelle": "Exprimer un récit interactif et une direction artistique",
+        "annee": "BUT3",
+        "acs": [
+          {
+            "code": "AC33.01",
+            "libelle": "Adopter et justifier une démarche originale et personnelle dans ses productions"
+          },
+          {
+            "code": "AC33.02",
+            "libelle": "Concevoir un design system et en produire les éléments visuels, graphiques ou sonores"
+          },
+          {
+            "code": "AC33.03",
+            "libelle": "Maitriser les étapes de production d'un projet multimédia"
+          },
+          {
+            "code": "AC33.04",
+            "libelle": "Produire les éléments pour une expérience sophistiquée (notamment immersive, en réalité virtuelle, augmentée...)"
+          },
+          {
+            "code": "AC33.05",
+            "libelle": "Apprehender les enjeux liés à la direction artistique"
+          }
+        ]
+      }
+    ]
+  },
+  "bdeb25b7e21ebc4dc5f3c0f97db7285e": {
+    "nom_court": "Développer",
+    "numero": 4,
+    "numero_identifiant": 4,
+    "libelle_long": "Développer pour le web et les médias numériques",
+    "couleur": "c4",
+    "id": "bdeb25b7e21ebc4dc5f3c0f97db7285e",
+    "situations": [
+      "Petite structure : Développement à partir de 0, avec une grande liberté en termes d’outils, de technologies, de méthodologie et de décision.",
+      "Grande organisation : Développement dans une grande organisation en respectant des processus structurés et contraignants.",
+      "Maintenance logicielle : Support, maintenance corrective et évolutive, gestion de la dette technique."
+    ],
+    "composantes_essentielles": [
+      "en se conformant aux standards du Web et aux normes d’accessibilité",
+      "en s’appuyant sur des concepts théoriques issus de l’informatique et des sciences de l’information",
+      "en produisant du code fonctionnel, sobre et réutilisable",
+      "en utilisant les outils favorisant un développement itératif et collaboratif",
+      "en veillant à la sécurité des systèmes et des données"
+    ],
+    "niveaux": [
+      {
+        "ordre": 1,
+        "libelle": "Développer un site web simple et le met en ligne",
+        "annee": "BUT1",
+        "acs": [
+          {
+            "code": "AC14.01",
+            "libelle": "Exploiter de manière autonome un environnement de développement efficace et productif"
+          },
+          {
+            "code": "AC14.02",
+            "libelle": "Produire des pages Web fluides incluant un balisage sémantique efficace et des interactions simples"
+          },
+          {
+            "code": "AC14.03",
+            "libelle": "Générer des pages Web à partir de données structurées"
+          },
+          {
+            "code": "AC14.04",
+            "libelle": "Mettre en ligne une application Web en utilisant une solution d’hébergement standard"
+          },
+          {
+            "code": "AC14.05",
+            "libelle": "Modéliser les données d’une application Web"
+          },
+          {
+            "code": "AC14.06",
+            "libelle": "Déployer et personnaliser une application Web en utilisant un CMS ou un framework MVC"
+          }
+        ]
+      },
+      {
+        "ordre": 2,
+        "libelle": "Développer une application Web interactive",
+        "annee": "BUT2",
+        "acs": [
+          {
+            "code": "AC24.01",
+            "libelle": "Produire des pages et applications Web responsives"
+          },
+          {
+            "code": "AC24.02",
+            "libelle": "Mettre en place ou développer un back office"
+          },
+          {
+            "code": "AC24.03",
+            "libelle": "Intégrer, produire ou développer des interactions riches ou des dispositifs interactifs"
+          },
+          {
+            "code": "AC24.04",
+            "libelle": "Modéliser les traitements d’une application Web"
+          },
+          {
+            "code": "AC24.05",
+            "libelle": "Optimiser une application web en termes de référencement et de temps de chargement"
+          },
+          {
+            "code": "AC24.06",
+            "libelle": "Configurer une solution d’hébergement adaptée aux besoins"
+          }
+        ]
+      },
+      {
+        "ordre": 3,
+        "libelle": "Développer un écosystème numérique complexe",
+        "annee": "BUT3",
+        "acs": [
+          {
+            "code": "AC34.01",
+            "libelle": "Développer à l’aide d’un framework de développement côté client"
+          },
+          {
+            "code": "AC34.02",
+            "libelle": "Développer à l’aide d’un framework de développement côté serveur"
+          },
+          {
+            "code": "AC34.03",
+            "libelle": "Développer des dispositifs interactifs sophistiqués"
+          },
+          {
+            "code": "AC34.04",
+            "libelle": "Concevoir et développer des composants logiciels, plugins ou extensions"
+          },
+          {
+            "code": "AC34.05",
+            "libelle": "Maitriser l'hébergement et le déploiement d'applications"
+          }
+        ]
+      }
+    ]
+  },
+  "689e945289af4e30650a910291c38e8a": {
+    "nom_court": "Entreprendre",
+    "numero": 5,
+    "numero_identifiant": 5,
+    "libelle_long": "Entreprendre dans le secteur du numérique",
+    "couleur": "c5",
+    "id": "689e945289af4e30650a910291c38e8a",
+    "situations": [
+      "Prestataire : Gestion de projet classique pour un client, dans une agence généraliste ou spécialisée (studio graphique, studio digital, production de jeu vidéo, production vidéo…).",
+      "Organisation traditionnelle : Accompagnement du changement et intrapreneuriat dans une entreprise, une administration ou une association.",
+      "Start-up: Entrepreneuriat et gestion de projet avec une méthode d’amélioration continue."
+    ],
+    "composantes_essentielles": [
+      "en s’appuyant sur une veille technologique et des modèles de l’innovation",
+      "en favorisant la collaboration entre les parties prenantes du projet",
+      "en respectant le droit et la vie privée",
+      "en favorisant la sobriété numérique",
+      "en exploitant des cadres de réflexion français et internationaux"
+    ],
+    "niveaux": [
+      {
+        "ordre": 1,
+        "libelle": "Entreprendre un projet numérique",
+        "annee": "BUT1",
+        "acs": [
+          {
+            "code": "AC15.01",
+            "libelle": "Gérer un projet avec une méthode classique"
+          },
+          {
+            "code": "AC15.02",
+            "libelle": "Budgéter un projet et suivre sa rentabilité"
+          },
+          {
+            "code": "AC15.03",
+            "libelle": "Découvrir les écosystèmes d’innovation numérique (fab labs, living labs, tiers-lieux, incubateurs…)"
+          },
+          {
+            "code": "AC15.04",
+            "libelle": "Analyser un produit ou un service innovant en identifiant les propositions de valeurs et en évaluant les solutions proposées"
+          },
+          {
+            "code": "AC15.05",
+            "libelle": "Construire une présence en ligne professionnelle (personal branding)"
+          },
+          {
+            "code": "AC15.06",
+            "libelle": "Interagir au sein des organisations"
+          },
+          {
+            "code": "AC15.07",
+            "libelle": "Produire un message écrit ou oral professionnel"
+          }
+        ]
+      },
+      {
+        "ordre": 2,
+        "libelle": "Entreprendre un projet au sein d’un écosystème numérique",
+        "annee": "BUT2",
+        "acs": [
+          {
+            "code": "AC25.01",
+            "libelle": "Gérer un projet avec une méthode d’amélioration continue par exemple une méthode agile"
+          },
+          {
+            "code": "AC25.02",
+            "libelle": "Cartographier un écosystème (identification des acteurs, synthèse des propositions de valeur)"
+          },
+          {
+            "code": "AC25.03",
+            "libelle": "Initier la constitution d’un réseau professionnel"
+          },
+          {
+            "code": "AC25.04",
+            "libelle": "Collaborer au sein des organisations"
+          },
+          {
+            "code": "AC25.05",
+            "libelle": "Maitriser les codes des productions écrites et orales professionnelles"
+          },
+          {
+            "code": "AC25.06",
+            "libelle": "Prendre en compte les contraintes juridiques"
+          }
+        ]
+      },
+      {
+        "ordre": 3,
+        "libelle": "Entreprendre dans le numérique",
+        "annee": "BUT3",
+        "acs": [
+          {
+            "code": "AC35.01",
+            "libelle": "Piloter un produit, un service ou une équipe"
+          },
+          {
+            "code": "AC35.02",
+            "libelle": "Maîtriser la qualité en projet Web ou multimédia"
+          },
+          {
+            "code": "AC35.03",
+            "libelle": "Concevoir un projet d’entreprise innovante en définissant le nom, l’identité, la forme juridique et le ton de la marque"
+          },
+          {
+            "code": "AC35.04",
+            "libelle": "Défendre un projet de manière convaincante"
+          }
+        ]
+      }
+    ]
+  }
+}

@@ -1,0 +1,153 @@
+/* Layout Principal */
+.Treeskill-container {
+    width: 100%;
+    height: 100vh;
+    display: flex;
+    overflow: hidden;
+    background: #05070a;
+    font-family: "Consolas", "Monaco", monospace;
+    color: #e2e8f0;
+}
+
+/* Zone SVG (Gauche) */
+.svg-wrapper {
+    flex-grow: 1;
+    position: relative;
+    overflow: hidden;
+    background-image:
+            linear-gradient(#111 1px, transparent 1px),
+            linear-gradient(90deg, #111 1px, transparent 1px);
+    background-size: 40px 40px;
+}
+
+.viewport {
+    width: 100%;
+    height: 100%;
+    /* Le SVG sera injecté ici */
+}
+
+/* Panneau Droite (HUD) */
+#panel {
+    width: 350px;
+    min-width: 350px;
+    background: rgba(11, 13, 16, 0.95);
+    border-left: 3px solid #333;
+    display: flex;
+    flex-direction: column;
+    z-index: 50;
+    box-shadow: -10px 0 50px #000;
+}
+
+.panel-header {
+    padding: 20px;
+    background: #0f1115;
+    border-bottom: 1px solid #333;
+    border-top: 4px solid #fff;
+    transition: border-color 0.3s;
+}
+
+.panel-title {
+    margin: 0;
+    font-size: 1.2rem;
+    color: #fff;
+    text-transform: uppercase;
+    letter-spacing: 2px;
+}
+
+.panel-meta {
+    font-size: 0.7rem;
+    color: #666;
+    margin-top: 5px;
+}
+
+.panel-body {
+    padding: 30px;
+    flex-grow: 1;
+    overflow-y: auto;
+}
+
+/* Écrans de données */
+.data-screen {
+    background: #000;
+    border: 1px solid #333;
+    padding: 15px;
+    margin-bottom: 20px;
+    border-radius: 2px;
+    min-height: 80px;
+    display: flex;
+    flex-direction: column;
+    justify-content: center;
+}
+
+.empty-state {
+    text-align: center;
+    color: #444;
+}
+
+.info-row {
+    display: flex;
+    justify-content: space-between;
+    margin-bottom: 8px;
+    font-size: 0.8rem;
+}
+.info-label { color: #555; }
+.info-val {
+    font-weight: bold  ;
+    padding-left: 4rem;
+
+}
+
+/* Contrôles */
+.hidden {
+    display: none;
+    opacity: 0;
+}
+
+#controls {
+    transition: opacity 0.3s;
+}
+
+input[type="range"] {
+    width: 100%;
+    margin: 15px 0;
+    cursor: pointer;
+    accent-color: #fff;
+}
+
+.btn-bios {
+    width: 100%;
+    padding: 15px;
+    background: #111;
+    border: 1px solid #444;
+    color: #888;
+    text-transform: uppercase;
+    font-weight: bold;
+    font-family: inherit;
+    cursor: pointer;
+    transition: 0.2s;
+}
+.btn-bios:hover {
+    border-color: #fff;
+    color: #fff;
+    background: #222;
+}
+
+.panel-footer {
+    padding: 25px;
+    background: #0f1115;
+    border-top: 1px solid #333;
+}
+
+.progress-track {
+    width: 100%;
+    height: 4px;
+    background: #222;
+    margin-top: 5px;
+}
+
+#global-bar {
+    width: 0%;
+    height: 100%;
+    background: #fff;
+    transition: width 1s, background-color 0.3s;
+}

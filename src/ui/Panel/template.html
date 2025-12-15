@@ -1,0 +1,40 @@
+<aside id="panel">
+    <div class="panel-header">
+        <h2 class="panel-title">MODULE INFO</h2>
+        <div class="panel-meta">
+            STATUS: <span id="sys-status">STANDBY</span>
+        </div>
+    </div>
+
+    <div class="panel-body">
+        <div class="data-screen" id="data-display">
+            <div class="empty-state">
+                [ NO SIGNAL ]<br />
+            </div>
+        </div>
+
+        <div id="controls" class="hidden">
+            <div class="info-row">
+                <span>PROGRESSION</span>
+                <span id="score-val">0mV</span>
+            </div>
+
+            <input type="range" id="score-slider" min="0" max="100" step="25" />
+
+            <br /><br />
+            <button class="btn-bios" id="btn-save">
+                [ INITIALISER ]
+            </button>
+        </div>
+    </div>
+
+    <div class="panel-footer">
+        <div class="info-row">
+            <span style="color: #666">GLOBAL COMPLETION</span>
+            <span id="global-score" style="color: #fff">0%</span>
+        </div>
+        <div class="progress-track">
+            <div id="global-bar"></div>
+        </div>
+    </div>
+</aside>

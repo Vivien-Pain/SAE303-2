@@ -1,0 +1,27 @@
+/* import des styles du ou des layouts */
+@import "./layouts/root/style.css";
+
+/* import des styles des pages */
+@import "pages/Treeskill/style.css";
+
+
+
+:root {
+  /* Primitives Tokens */
+  --color-neutral-100: #ffffff;
+  --color-neutral-900: #1a1a1a;
+  --color-blue-500: #3b82f6;
+  --color-green-500: #10b981;
+  --color-red-500: #ef4444;
+
+  /* Semantics Tokens*/
+  --color-bg: var(--color-neutral-100);
+  --color-fg: var(--color-neutral-900);
+  --color-primary: var(--color-blue-500);
+  --color-success: var(--color-green-500);
+  --color-danger: var(--color-red-500);
+}
+
+body{
+  margin: 0;
+}
