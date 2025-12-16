@@ -6,6 +6,7 @@ import Panel from "./panel.js";
 import { enableZoomAndPan } from "./zoom.js";
 import ACData from "../../data/AC.json";
 import { ParcoursSelectorView } from "../../ui/ParcourSelector/index.js";
+import { initWiring } from "./wiring.js";
 
 let M = {
   rootPage: null,
@@ -49,17 +50,18 @@ C.handler_selectParcours = function(choice) {
     if (choice === "all") localStorage.removeItem("parcours");
     else localStorage.setItem("parcours", choice);
   } catch (e) {}
-
-  try {
-    const evt = new CustomEvent("parcours:selected", { detail: { choice }, bubbles: true });
-    window.dispatchEvent(evt);
-  } catch (e) {}
-
   if (choice && choice !== "all") {
     C.handler_filterTreeByParcours(choice);
   } else if (choice === "all") {
     C.handler_filterTreeByParcours(null);
   }
+  try {
+    const evt = new CustomEvent("parcours:selected", { detail: { choice }, bubbles: true });
+    window.dispatchEvent(evt);
+  } catch (e) {}
+  try {
+    if (M.wiring && typeof M.wiring.update === "function") M.wiring.update();
+  } catch (e) {}
 
   if (typeof V.hideSelector === "function") {
     try { V.hideSelector(); } catch (e) {}
@@ -137,6 +139,8 @@ V.init = function() {
 
   M.treeDom = treeDom;
 
+
+
   const slot = M.rootPage.querySelector('slot[name="svg"]');
   if (slot) slot.replaceWith(treeDom);
   else {
@@ -144,6 +148,10 @@ V.init = function() {
     if (viewport?.appendChild) viewport.appendChild(treeDom);
     else if (viewport?.append) viewport.append(treeDom);
   }
+
+  try {
+    M.wiring = initWiring(M.treeDom, ACData);
+  } catch (e) {}
 
   const panelSlot = M.rootPage.querySelector('slot[name="panel"]');
   const panelDom = (panelView && typeof panelView.dom === 'function') ? panelView.dom() : null;
@@ -218,6 +226,9 @@ V.attachEvents = function() {
   window.addEventListener('parcours:selected', e => {
     const choice = e?.detail?.choice;
     if (choice) C.handler_filterTreeByParcours(choice);
+  });
+  window.addEventListener('ac:updated', () => {
+    try { if (M.wiring && typeof M.wiring.update === "function") M.wiring.update(); } catch (e) {}
   });
 
   return M.rootPage;

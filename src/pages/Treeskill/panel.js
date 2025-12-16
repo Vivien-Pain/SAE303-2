@@ -32,7 +32,24 @@ const Panel = {
   _bindEvents() {
     const s = this.dom.slider;
     const b = this.dom.btnSave;
-    if (s) s.addEventListener("input", (e) => this.updateInterface(e.target.value));
+    if (s) {
+      s.addEventListener("input", (e) => {
+        const val = e.target.value;
+        this.updateInterface(val);
+        // Sauvegarde immédiate et notification si une sélection est active
+        if (this.activeSelection && this.activeSelection.code) {
+          const key = this.activeSelection.code;
+          const numVal = parseInt(val, 10) || 0;
+          this._setStoredScore(key, numVal);
+          // Mettre à jour le global d'UI immédiatement
+          this.updateGlobal();
+          // Notifier les autres modules (wiring écoute 'ac:updated')
+          try {
+            window.dispatchEvent(new CustomEvent('ac:updated', { detail: { code: key, value: numVal } }));
+          } catch (e) {}
+        }
+      });
+    }
     if (b) b.addEventListener("click", () => this.saveData());
   },
 
@@ -74,81 +91,30 @@ const Panel = {
     return defaultColor || '#00ff41';
   },
 
-  _buildInfoFragment(match, name, storedScore) {
-    const frag = document.createDocumentFragment();
-
-    const row = (label, val) => {
-      const r = document.createElement('div');
-      r.className = 'info-row';
-      const l = document.createElement('span');
-      l.className = 'info-label';
-      l.innerText = label;
-      const v = document.createElement('span');
-      v.className = 'info-val';
-      v.innerText = val ?? '';
-      r.appendChild(l);
-      r.appendChild(document.createTextNode(' '));
-      r.appendChild(v);
-      return r;
-    };
-
-    frag.appendChild(row('ID', name));
-    frag.appendChild(row('NOM', match ? (match.ac.libelle || '') : ''));
-
-    const hr1 = document.createElement('hr');
-    hr1.style.border = '0';
-    hr1.style.borderTop = '1px dashed #333';
-    hr1.style.margin = '10px 0';
-    frag.appendChild(hr1);
-
+  _buildInfoHtml(match, name, storedScore) {
+    let html = `
+      <div class="info-row"><span class="info-label">ID</span> <span class="info-val">${name}</span></div>
+      <div class="info-row"><span class="info-label">NOM</span> <span class="info-val">${match ? match.ac.libelle : ''}</span></div>
+      <hr style="border:0; border-top:1px dashed #333; margin:10px 0;">
+    `;
     if (match) {
-      frag.appendChild(row('COMPÉTENCE', match.group.libelle_long || ''));
-      frag.appendChild(row('ANNÉE', match.niveau.annee || ''));
-
-      if (Array.isArray(match.group.composantes_essentielles) && match.group.composantes_essentielles.length) {
-        const hr2 = document.createElement('hr');
-        hr2.style.border = '0';
-        hr2.style.borderTop = '1px dashed #333';
-        hr2.style.margin = '10px 0';
-        frag.appendChild(hr2);
-
-        const wrapper = document.createElement('div');
-        wrapper.style.fontSize = '0.85rem';
-        wrapper.style.color = '#aaa';
-        const strong = document.createElement('strong');
-        strong.innerText = 'Composantes Essentielles :';
-        wrapper.appendChild(strong);
-
-        const ul = document.createElement('ul');
-        match.group.composantes_essentielles.forEach(s => {
-          const li = document.createElement('li');
-          li.innerText = s;
-          ul.appendChild(li);
-        });
-        wrapper.appendChild(ul);
-        frag.appendChild(wrapper);
+      const { group, niveau } = match;
+      html += `
+        <div class="info-row"><span class="info-label">COMPÉTENCE</span> <span class="info-val">${group.libelle_long}</span></div>
+        <div class="info-row"><span class="info-label">ANNÉE</span> <span class="info-val">${niveau.annee}</span></div>
+      `;
+      if (Array.isArray(group.composantes_essentielles) && group.composantes_essentielles.length) {
+        html += `<hr style="border:0; border-top:1px dashed #333; margin:10px 0;"><div style="font-size:0.85rem; color:#aaa;"><strong>Composantes Essentielles :</strong><ul>`;
+        group.composantes_essentielles.forEach(s => { html += `<li>${s}</li>`; });
+        html += `</ul></div>`;
       }
     } else {
-      const none = document.createElement('div');
-      none.style.fontSize = '0.9rem';
-      none.style.color = '#888';
-      none.innerText = 'Aucune donnée AC trouvée pour ce code.';
-      frag.appendChild(none);
+      html += `<div>Aucune donnée AC trouvée pour ce code.</div>`;
     }
-
-    const hr3 = document.createElement('hr');
-    hr3.style.border = '0';
-    hr3.style.borderTop = '1px dashed #333';
-    hr3.style.margin = '10px 0';
-    frag.appendChild(hr3);
-
-    const status = document.createElement('div');
-    status.style.fontSize = '0.8rem';
-    status.style.color = '#888';
-    status.innerText = storedScore === 100 ? 'COMPÉTENCE VALIDÉE.' : 'ACQUISITION EN COURS...';
-    frag.appendChild(status);
-
-    return frag;
+    html += `<hr>
+      <div>${storedScore === 100 ? "COMPÉTENCE VALIDÉE." : "ACQUISITION EN COURS..."}</div>
+    `;
+    return html;
   },
 
   _applySelectionStyles(color) {
@@ -187,10 +153,7 @@ const Panel = {
     if (this.dom.display) {
       this.dom.display.style.color = resolvedColor;
       this.dom.display.style.borderColor = resolvedColor;
-      // insertion via DOM (plus propre, pas de HTML brut)
-      this.dom.display.innerHTML = '';
-      const frag = this._buildInfoFragment(match, name, storedScore);
-      this.dom.display.appendChild(frag);
+      this.dom.display.innerHTML = this._buildInfoHtml(match, name, storedScore);
     }
 
     if (this.dom.slider) this.dom.slider.value = storedScore;
@@ -206,7 +169,8 @@ const Panel = {
     if (!this.activeSelection) return;
     const key = this.activeSelection.code;
     const val = this.dom.slider ? this.dom.slider.value : 0;
-    this._setStoredScore(key, val);
+    const numVal = parseInt(val, 10) || 0;
+    this._setStoredScore(key, numVal);
 
     const btn = this.dom.btnSave;
     if (btn) {
@@ -222,6 +186,11 @@ const Panel = {
     }
 
     this.updateGlobal();
+
+    // notifier wiring / autres listeners
+    try {
+      window.dispatchEvent(new CustomEvent('ac:updated', { detail: { code: key, value: numVal } }));
+    } catch (e) {}
   },
 
   updateGlobal() {

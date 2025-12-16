@@ -233,3 +233,19 @@ input[type="range"] {
     pointer-events: none !important;
     filter: grayscale(100%);
 }
+
+.cable {
+    transition: stroke 0.25s ease, opacity 0.25s ease, filter 0.25s ease;
+}
+
+.cable.no-current {
+    stroke: #777 !important;
+    opacity: 0.35;
+    filter: grayscale(100%) brightness(0.9);
+    animation: none !important;
+}
+
+.cable.has-current {
+    opacity: 1;
+    filter: none;
+}
