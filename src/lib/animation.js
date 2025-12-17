@@ -1,44 +1,6 @@
-// javascript
 import { gsap } from 'gsap';
-
 const GREY = '#6f7a84';
 
-// Récupère shapes dans un élément (ou l'élément lui‑même s'il est une shape)
-function getShapes(el) {
-  const shapes = Array.from(el?.querySelectorAll('path, rect, circle, ellipse, polygon, polyline, line') || []);
-  if (!shapes.length && el && /path|rect|circle|line/i.test(el.tagName)) return [el];
-  return shapes;
-}
-
-// Anime un élément (éléments SVG) : couleur, opacité, stroke pour câbles vs éléments
-export function animateShape(el, color, prog = 0, isCable = false, duration = 0.45) {
-  if (!el) return;
-  const done = prog >= 100;
-  const dColor = prog > 0 || done ? (color || GREY) : GREY;
-  const shapes = getShapes(el);
-
-  if (isCable) {
-    gsap.to(shapes, {
-      duration,
-      stroke: prog > 0 ? dColor : GREY,
-      strokeOpacity: done ? 1 : (prog > 0 ? 0.75 : 0.6),
-      opacity: done ? 1 : (prog > 0 ? 0.85 : 0.9),
-      ease: 'power1.out'
-    });
-    // mise à jour de la variable CSS pour utilisation dans le style
-    gsap.to(el, { duration, css: { '--wiring-color': dColor }, ease: 'power1.out' });
-  } else {
-    gsap.to(shapes, {
-      duration,
-      fill: (done || prog > 0) ? dColor : '',
-      stroke: done ? '' : (prog > 0 ? dColor : GREY),
-      opacity: done ? 1 : (prog > 0 ? 0.6 : 1),
-      ease: 'power1.out'
-    });
-  }
-}
-
-// Animer un segment de RAM (élément DOM non‑SVG) : background / fill
 export function animateRamSegment(seg, lit, color, duration = 0.35) {
   const c = lit ? (color || '#00ff41') : GREY;
   gsap.to(seg, {
@@ -49,3 +11,63 @@ export function animateRamSegment(seg, lit, color, duration = 0.35) {
     ease: 'power1.out'
   });
 }
+
+export function animateFan(el, litCount = 0, total = 1, opts = {}) {
+  if (!el) {
+    console.error('[animateFan] Élément null/undefined');
+    return;
+  }
+
+  let targets = el.querySelectorAll('[id^="pale"]');
+  if (targets.length === 0) {
+    console.warn('[animateFan] Aucune pale trouvée, abandon');
+    return;
+  }
+
+  if (!el._fanInit) {
+    const grandRond = el.querySelector('#GrandRond');
+    gsap.set(targets, {
+      transformOrigin: "center",
+      svgOrigin: "383.75 1489.75"
+    });
+
+    el._fanInit = true;
+  }
+
+  const safeTotal = Math.max(1, total);
+  const safeLit = Math.max(0, litCount);
+  const ratio = Math.min(1, safeLit / safeTotal);
+
+  const minDur = opts.minDuration || 1.5;
+  const maxDur = opts.maxDuration || 5.0;
+  const targetDuration = maxDur - (ratio * (maxDur - minDur));
+
+  if (!el._fanTween) {
+    el._fanTween = gsap.to(targets, {
+      rotation: 360,
+      duration: targetDuration,
+      repeat: -1,
+      ease: 'none',
+      paused: true
+    });
+  }
+  if (safeLit === 0) {
+    if (el._fanTween.isActive()) {
+      gsap.to(el._fanTween, {
+        timeScale: 0,
+        duration: 1.5,
+        onComplete: () => el._fanTween.pause()
+      });
+    }
+  } else {
+    if (el._fanTween.paused() || el._fanTween.timeScale() === 0) {
+      el._fanTween.play();
+      gsap.to(el._fanTween, { timeScale: 1, duration: 0.5 });
+    }
+    if (Math.abs(el._fanTween.duration() - targetDuration) > 0.05) {
+      el._fanTween.duration(targetDuration);
+    }
+  }
+}
+
+
