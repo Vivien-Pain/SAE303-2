@@ -1,12 +1,11 @@
 import { htmlToDOM } from "../../lib/utils.js";
 import template from "./template.html?raw";
 import { TreeSkillView } from "../../ui/TreeSkill/index.js";
-import { PanelView } from "../../ui/Panel/index.js";
-import Panel from "./panel.js";
-import { enableZoomAndPan } from "./zoom.js";
-import ACData from "../../data/AC.json";
+import { PanelView, PanelController } from "../../ui/Panel/index.js";
 import { ParcoursSelectorView } from "../../ui/ParcourSelector/index.js";
-import { initWiring } from "./wiring.js";
+import { initWiring } from "../../ui/TreeSkill/wiring.js";
+import { enableZoomAndPan } from "../../lib/zoom.js";
+import ACData from "../../data/AC.json";
 
 let M = {
   rootPage: null,
@@ -117,7 +116,8 @@ C.handler_nodeEvent = function(e) {
   if (group.classList.contains('node-hidden')) return;
   const color = C.getColor(group);
   if (found.code) {
-    Panel.selectNode(found.code, color, group, ACData);
+    // Utilisation du PanelController importé
+    PanelController.selectNode(found.code, color, group, ACData);
   }
 };
 
@@ -139,8 +139,6 @@ V.init = function() {
 
   M.treeDom = treeDom;
 
-
-
   const slot = M.rootPage.querySelector('slot[name="svg"]');
   if (slot) slot.replaceWith(treeDom);
   else {
@@ -150,6 +148,7 @@ V.init = function() {
   }
 
   try {
+    // Utilisation de initWiring importé depuis UI
     M.wiring = initWiring(M.treeDom, ACData);
   } catch (e) {}
 
@@ -161,7 +160,8 @@ V.init = function() {
     if (container?.appendChild) container.appendChild(panelDom);
   }
 
-  if (typeof Panel.init === 'function') Panel.init(M.rootPage);
+  // Initialisation du contrôleur de Panel
+  if (typeof PanelController.init === 'function') PanelController.init(M.rootPage);
 
   M.selectorEl = ParcoursSelectorView.dom();
 
