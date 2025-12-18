@@ -250,4 +250,66 @@ input[type="range"] {
     filter: none;
 }
 
+.boot-screen {
+    position: fixed;
+    top: 0; left: 0;
+    width: 100vw; height: 100vh;
+    background: #000;
+    color: #00ff41;
+    font-family: "Consolas", monospace;
+    z-index: 9999;
+    padding: 40px;
+    display: flex;
+    flex-direction: column;
+    justify-content: flex-start;
+}
+
+.boot-logo {
+    position: absolute;
+    bottom: 40px;
+    right: 40px;
+    font-weight: bold;
+    border: 1px solid #00ff41;
+    padding: 10px;
+}
+
+.justification-row { margin-top: 8px; flex-direction: column; align-items: stretch; gap: 6px; }
+.justification-label { display: block; font-size: 0.85rem; color: #aaa; margin-bottom: 4px; }
+
+.justification-input {
+    width: 100%;
+    box-sizing: border-box;
+    resize: vertical;
+    min-height: 64px;
+    padding: 8px 10px;
+    background: #0b0d10;
+    border: 1px solid #2b2b2b;
+    color: #e6e6e6;
+    border-radius: 6px;
+    font-family: inherit;
+    font-size: 0.95rem;
+    outline: none;
+    transition: border-color 0.12s, box-shadow 0.12s;
+}
+
+:root { --panel-accent: #8a2be2; }
+
+.justification-input:focus {
+    border-color: var(--panel-accent);
+    box-shadow: 0 0 0 4px rgba(138,43,226,0.06);
+}
+
+.info-val.justification-display {
+    padding: 8px 10px;
+    color: #ddd;
+    background: rgba(255,255,255,0.02);
+    border-left: 3px solid rgba(255,255,255,0.03);
+    border-radius: 4px;
+    font-size: 0.9rem;
+    white-space: pre-wrap;
+    padding-left: 0.5rem;
+}
+
+.justification-display-row { flex-direction: column; align-items: stretch; gap: 6px; }
+
 

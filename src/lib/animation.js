@@ -1,3 +1,4 @@
+// `src/lib/animation.js`
 import { gsap } from 'gsap';
 const GREY = '#6f7a84';
 
@@ -70,4 +71,68 @@ export function animateFan(el, litCount = 0, total = 1, opts = {}) {
   }
 }
 
+export function typeWriter(element, text, speed = 20) {
+  return new Promise((resolve) => {
+    let i = 0;
+    element.innerHTML = "";
+    function type() {
+      if (i < text.length) {
+        element.innerHTML += text.charAt(i);
+        i++;
+        setTimeout(type, speed);
+      } else {
+        resolve();
+      }
+    }
+    type();
+  });
+}
 
+export function bootSequence(container) {
+  const lines = [
+    "> INITIALIZING SYSTEM...",
+    "> LOADING KERNEL...",
+    "> CHECKING MEMORY... OK",
+    "> LOADING ASSETS...",
+    "> SYSTEM READY."
+  ];
+
+  return async () => {
+    for (const line of lines) {
+      const p = document.createElement('p');
+      p.style.margin = "2px 0";
+      container.appendChild(p);
+      await typeWriter(p, line, 30);
+    }
+  };
+}
+
+/* Nouvelle fonction exportée pour gérer l'overlay de boot et la suppression */
+export async function startBootSequence(rootPage, opts = {}) {
+  if (!rootPage) return;
+  const bootOverlay = rootPage.querySelector('.boot-screen');
+  const logContainer = rootPage.querySelector('#boot-log');
+
+  if (!bootOverlay || !logContainer) return;
+
+  const runBoot = bootSequence(logContainer);
+  await runBoot();
+
+  return new Promise((resolve) => {
+    gsap.to(bootOverlay, {
+      opacity: 0,
+      duration: 0.8,
+      ease: "power2.inOut",
+      onComplete: () => {
+        bootOverlay.remove();
+        try {
+          const saved = localStorage.getItem("parcours");
+          if (!saved && typeof opts.showSelector === 'function') {
+            opts.showSelector();
+          }
+        } catch (e) {}
+        resolve();
+      }
+    });
+  });
+}

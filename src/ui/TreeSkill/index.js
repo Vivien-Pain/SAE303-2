@@ -219,8 +219,6 @@ const WiringController = {
 
     fanElements.forEach(el => {
       let codes = [];
-
-      // D'abord chercher les codes directement dans l'élément
       el.querySelectorAll('*').forEach(desc => {
         const code = this.getCode(desc);
         if (code && !codes.includes(code)) {
@@ -228,11 +226,10 @@ const WiringController = {
         }
       });
 
-      // Si aucun code trouvé, chercher par nom de compétence
       if (!codes.length) {
         const fanName = el.id.replace(/^Ventilateur\s*/i, '').toLowerCase().trim();
 
-        // Normaliser les accents pour la comparaison
+
         const normalize = str => str.normalize('NFD').replace(/[\u0300-\u036f]/g, '');
         const normalizedFanName = normalize(fanName);
 

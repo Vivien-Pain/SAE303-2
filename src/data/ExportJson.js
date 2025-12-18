@@ -1,12 +1,10 @@
 export function exportLocalStorageToJSON() {
   const localStorageData = {};
 
-  // Récupérer toutes les données du localStorage
   for (let i = 0; i < localStorage.length; i++) {
     const key = localStorage.key(i);
     const value = localStorage.getItem(key);
 
-    // Essayer de parser les valeurs JSON, sinon garder la chaîne
     try {
       localStorageData[key] = JSON.parse(value);
     } catch (e) {

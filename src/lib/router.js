@@ -69,8 +69,7 @@ class Router {
     });
     return this;
   }
-  
-  // Convertir un chemin en regex
+
   pathToRegex(path) {
     if (path === '*') return /.*/;
     
@@ -81,8 +80,7 @@ class Router {
     
     return new RegExp('^' + pattern + '$');
   }
-  
-  // Extraire les noms des paramètres
+
   extractParams(path) {
     const params = [];
     const matches = path.matchAll(/:(\w+)/g);
@@ -91,8 +89,7 @@ class Router {
     }
     return params;
   }
-  
-  // Extraire les valeurs des paramètres
+
   getParams(route, path) {
     const matches = path.match(route.regex);
     if (!matches) return {};
@@ -103,21 +100,17 @@ class Router {
     });
     return params;
   }
-  
-  // Naviguer vers une route
+
   navigate(path) {
     window.history.pushState(null, null, path);
     this.handleRoute();
   }
-  
-  // Gérer la route actuelle
+
   handleRoute() {
     const path = window.location.pathname;
-    
-    // Trouver la route correspondante
+
     for (const route of this.routes) {
       if (route.regex.test(path)) {
-        // Vérifier l'authentification si nécessaire
         if (route.requireAuth && !this.isAuthenticated) {
           sessionStorage.setItem('redirectAfterLogin', path);
           this.navigate(this.loginPath);
@@ -126,54 +119,43 @@ class Router {
         
         this.currentRoute = path;
         const params = this.getParams(route, path);
-        
-        // Générer le contenu de la page
+
         const content = route.handler(params);
         
         if (content instanceof Promise) {
-          // Le handler retourne une promesse
           content.then(res => {
             this.renderContent(res, route, path);
           });
         } else {
-          // Le handler retourne directement le contenu
           this.renderContent(content, route, path);
         }
         return;
       }
     }
-    
-    // Route 404 si aucune correspondance
+
     const notFound = this.routes.find(r => r.path === '*');
     if (notFound) {
       const content = notFound.handler({});
       this.root.innerHTML = content;
     }
   }
-  
-  // Rendre le contenu dans le root ou via un layout
+
   renderContent(content, route, path) {
     const isFragment = content instanceof DocumentFragment;
     const isElement = content instanceof HTMLElement;
     
-    // Appliquer le layout seulement si useLayout est true
-    
     if (route.useLayout) {
       const layoutFn = this.findLayout(path);
       if (layoutFn) {
-        
-        // Le layout retourne un DocumentFragment
+
         const layoutFragment = layoutFn();
-        
-        // Chercher l'élément <slot> dans le layout
+
         const contentSlot = layoutFragment.querySelector('slot');
         
         if (contentSlot) {
-          // Insérer le contenu de la page dans le slot
           if (isElement ||isFragment) {
             contentSlot.replaceWith(content);
           } else {
-            // Créer un fragment temporaire pour le HTML string
             const tempFragment = document.createElement('template');
             tempFragment.innerHTML = content;
             contentSlot.replaceWith(tempFragment.content);
@@ -181,8 +163,7 @@ class Router {
         } else {
           console.warn('Layout does not contain a <slot> element. Content will not be inserted.');
         }
-        
-        // Insérer le layout complet dans this.root
+
         this.root.innerHTML = '';
         this.root.appendChild(layoutFragment);
       } else {

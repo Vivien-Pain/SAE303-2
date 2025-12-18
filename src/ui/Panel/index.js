@@ -11,7 +11,6 @@ class PanelView {
   }
 }
 
-// CONTROLLER
 const PanelController = {
   dom: {},
   activeSelection: null,
@@ -38,7 +37,8 @@ const PanelController = {
       scoreVal: q("#score-val"),
       btnSave: q("#btn-save"),
       globalScore: q("#global-score"),
-      globalBar: q("#global-bar")
+      globalBar: q("#global-bar"),
+      justification: q("#justification")
     };
   },
 
@@ -53,6 +53,12 @@ const PanelController = {
         window.dispatchEvent(new CustomEvent('ac:updated', {
           detail: { code: this.activeSelection.code, value: val }
         }));
+      }
+    });
+
+    this.dom.justification?.addEventListener("input", e => {
+      if (this.activeSelection?.code) {
+        localStorage.setItem(this.activeSelection.code + "_note", e.target.value || "");
       }
     });
 
@@ -91,9 +97,10 @@ const PanelController = {
 
   selectNode(code, color = "#8a2be2", element = null, acData = null) {
     const storedScore = Number(localStorage.getItem(code)) || 0;
+    const storedNote = localStorage.getItem(code + "_note") || "";
     const name = element?.querySelector?.('title')?.textContent?.trim() ||
-      element?.querySelector?.('.label')?.textContent?.trim() ||
-      element?.dataset?.name || code;
+        element?.querySelector?.('.label')?.textContent?.trim() ||
+        element?.dataset?.name || code;
 
     const match = this.findAC(code, acData);
     const resolvedColor = this.resolveColor(color, element, match);
@@ -105,12 +112,12 @@ const PanelController = {
         color: resolvedColor,
         borderColor: resolvedColor
       });
-      this.dom.display.innerHTML = this._buildInfoHtml(match, name, storedScore);
+      this.dom.display.innerHTML = this._buildInfoHtml(match, name, storedScore, storedNote);
     }
 
     if (this.dom.slider) this.dom.slider.value = storedScore;
+    if (this.dom.justification) this.dom.justification.value = storedNote;
 
-    // Styles
     Object.assign(this.dom.header?.style || {}, { borderTopColor: resolvedColor });
     Object.assign(this.dom.status || {}, { innerText: "EDITING", style: { color: resolvedColor } });
     Object.assign(this.dom.controls?.style || {}, { display: "block" });
@@ -125,7 +132,7 @@ const PanelController = {
     this.updateInterface(storedScore);
   },
 
-  _buildInfoHtml(match, name, storedScore) {
+  _buildInfoHtml(match, name, storedScore, storedNote = "") {
     const parts = [
       `<div class="info-row"><span class="info-label">ID</span> <span class="info-val">${name}</span></div>`,
       `<div class="info-row"><span class="info-label">NOM</span> <span class="info-val">${match?.ac.libelle || ''}</span></div>`,
@@ -134,24 +141,34 @@ const PanelController = {
 
     if (match) {
       parts.push(
-        `<div class="info-row"><span class="info-label">COMPÉTENCE</span> <span class="info-val">${match.group.libelle_long}</span></div>`,
-        `<div class="info-row"><span class="info-label">ANNÉE</span> <span class="info-val">${match.niveau.annee}</span></div>`
+          `<div class="info-row"><span class="info-label">COMPÉTENCE</span> <span class="info-val">${match.group.libelle_long}</span></div>`,
+          `<div class="info-row"><span class="info-label">ANNÉE</span> <span class="info-val">${match.niveau.annee}</span></div>`
       );
 
       if (match.group.composantes_essentielles?.length) {
         const items = match.group.composantes_essentielles.map(s => `<li>${s}</li>`).join('');
         parts.push(
-          `<hr style="border:0; border-top:1px dashed #333; margin:10px 0;">`,
-          `<div style="font-size:0.85rem; color:#aaa;"><strong>Composantes Essentielles :</strong><ul>${items}</ul></div>`
+            `<hr style="border:0; border-top:1px dashed #333; margin:10px 0;">`,
+            `<div style="font-size:0.85rem; color:#aaa;"><strong>Composantes Essentielles :</strong><ul>${items}</ul></div>`
         );
       }
     } else {
       parts.push(`<div>Aucune donnée AC trouvée pour ce code.</div>`);
     }
 
+    if (storedNote) {
+      parts.push(
+          `<hr>`,
+          `<div class="info-row justification-display-row">`,
+          `<span class="info-label">JUSTIFICATION</span>`,
+          `<div class="info-val justification-display" style="white-space:pre-wrap;">${storedNote}</div>`,
+          `</div>`
+      );
+    }
+
     parts.push(
-      `<hr>`,
-      `<div>${storedScore === 100 ? "COMPÉTENCE VALIDÉE." : "ACQUISITION EN COURS..."}</div>`
+        `<hr>`,
+        `<div>${storedScore === 100 ? "COMPÉTENCE VALIDÉE." : "ACQUISITION EN COURS..."}</div>`
     );
 
     return parts.join('');
@@ -167,6 +184,9 @@ const PanelController = {
     const { code, color } = this.activeSelection;
     const val = Number(this.dom.slider?.value) || 0;
     localStorage.setItem(code, val);
+
+    const note = this.dom.justification?.value || "";
+    localStorage.setItem(code + "_note", note);
 
     if (this.dom.btnSave) {
       const originalText = this.dom.btnSave.innerText;
@@ -186,9 +206,9 @@ const PanelController = {
   updateGlobal() {
     const nodes = Array.from(this.root?.querySelectorAll("[id^='AC']") || []);
     const acKeys = nodes.length ?
-      nodes.map(n => n.id) :
-      Array.from({ length: localStorage.length }, (_, i) => localStorage.key(i))
-        .filter(k => k?.startsWith('AC'));
+        nodes.map(n => n.id) :
+        Array.from({ length: localStorage.length }, (_, i) => localStorage.key(i))
+            .filter(k => k?.startsWith('AC'));
 
     const total = acKeys.reduce((sum, key) => sum + (Number(localStorage.getItem(key)) || 0), 0);
     const average = acKeys.length ? Math.round(total / acKeys.length) : 0;

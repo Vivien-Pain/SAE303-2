@@ -1,10 +1,13 @@
+// `src/pages/Treeskill/page.js`
 import { htmlToDOM } from "../../lib/utils.js";
 import template from "./template.html?raw";
 import { TreeSkillView, initWiring } from "../../ui/TreeSkill/index.js";
 import { PanelView, PanelController } from "../../ui/Panel/index.js";
 import { ParcoursSelectorView } from "../../ui/ParcourSelector/index.js";
 import { enableZoomAndPan } from "../../lib/zoom.js";
+import { startBootSequence } from "../../lib/animation.js";
 import ACData from "../../data/AC.json";
+import { gsap } from 'gsap';
 
 let M = {
   rootPage: null,
@@ -15,6 +18,8 @@ let M = {
 };
 
 let C = {};
+
+/* La fonction C.startBootSequence a été déplacée vers `src/lib/animation.js` */
 
 C.filterTreeByParcours = function(choice) {
   if (!M.treeDom) return;
@@ -87,6 +92,9 @@ let V = {};
 V.init = function() {
   M.rootPage = htmlToDOM(template);
 
+  const bootHTML = `<div class="boot-screen"><div id="boot-log"></div></div>`;
+  M.rootPage.appendChild(htmlToDOM(bootHTML));
+
   const treeView = new TreeSkillView();
   let treeDom = treeView.dom();
   if (typeof treeDom === "string") treeDom = htmlToDOM(treeDom);
@@ -94,7 +102,6 @@ V.init = function() {
 
   M.treeDom = treeDom;
 
-  // Insertion tree
   const slot = M.rootPage.querySelector('slot[name="svg"]');
   slot ? slot.replaceWith(treeDom) :
     M.rootPage.querySelector(".viewport")?.appendChild(treeDom);
@@ -119,15 +126,8 @@ V.init = function() {
   const saved = localStorage.getItem("parcours");
   if (saved) {
     C.filterTreeByParcours(saved);
-    try {
-      window.dispatchEvent(new CustomEvent("parcours:selected", {
-        detail: { choice: saved },
-        bubbles: true
-      }));
-    } catch (e) {}
-  } else {
-    V.showSelector();
   }
+
   M.treeDom.addEventListener("click", C.handleNodeClick);
   M.treeDom.addEventListener("pointerdown", C.handleNodeClick, { passive: true });
 
@@ -137,8 +137,8 @@ V.init = function() {
 
   window.addEventListener('ac:updated', () => M.wiring?.update());
 
-  // Zoom
   setTimeout(() => enableZoomAndPan(M.treeDom, M.rootPage, M.zoom), 0);
+  setTimeout(() => startBootSequence(M.rootPage, { showSelector: V.showSelector }), 100);
 
   return M.rootPage;
 };
