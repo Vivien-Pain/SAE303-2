@@ -3,7 +3,7 @@ import template from "./template.html?raw";
 import { TreeSkillView, initWiring } from "../../ui/TreeSkill/index.js";
 import { PanelView, PanelController } from "../../ui/Panel/index.js";
 import { enableZoomAndPan } from "../../lib/zoom.js";
-import { startBootSequence } from "../../lib/animation.js";
+import { startBootSequence, animateNodeSelect } from "../../lib/animation.js";
 import { pn } from "../../data/pn.js";
 
 let M = {
@@ -33,14 +33,17 @@ C.handleNodeClick = function(e) {
   if (!found || found.element.classList.contains('node-hidden')) return;
 
   const color = found.element.style.getPropertyValue?.("--active-color") ||
-    getComputedStyle(found.element).getPropertyValue?.("--active-color") ||
-    "#00ff41";
+      getComputedStyle(found.element).getPropertyValue?.("--active-color") ||
+      "#00ff41";
 
   const label = pn.getACLibelle(found.code);
   if (label) {
     found.element.dataset.acLibelle = label;
     found.element.setAttribute("title", label);
   }
+
+  // --- GSAP Trigger ---
+  animateNodeSelect(found.element);
 
   PanelController.selectNode(found.code, color, found.element, pn);
 };

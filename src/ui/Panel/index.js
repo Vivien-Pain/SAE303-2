@@ -1,4 +1,5 @@
 import { htmlToDOM } from "../../lib/utils.js";
+import { animatePanelOpen, animateSaveFeedback, animateHistoryTimeline, animateNewHistoryEntry } from "../../lib/animation.js";
 import template from "./template.html?raw";
 
 class PanelView {
@@ -9,6 +10,7 @@ class PanelView {
     return this.root;
   }
 }
+
 const PanelController = {
   dom: {},
   activeSelection: null,
@@ -28,7 +30,8 @@ const PanelController = {
     this.loadHistory();
     this._bindEvents();
     this.updateGlobal();
-    this.renderHistory();
+
+    this.renderHistory(true);
   },
 
   _getDom(root) {
@@ -59,18 +62,33 @@ const PanelController = {
     const container = document.createElement("div");
     container.id = "ac-history";
     container.className = "ac-history";
-    container.style.cssText = "margin-top:12px;border-top:1px solid rgba(255,255,255,0.03);padding-top:8px;";
+    container.style.cssText = "margin-top:20px; border-top:1px solid rgba(255,255,255,0.05); padding-top:15px;";
 
     const header = document.createElement("div");
     header.className = "history-header";
-    header.textContent = "HISTORIQUE";
-    header.style.cssText = "font-weight:700;margin:4px 0;color:#ccc;font-size:0.85rem";
+    header.textContent = "SYSTEM LOGS";
+    header.style.cssText = "font-weight:700; margin-bottom:12px; color:#6f7a84; font-size:0.75rem; letter-spacing:1px;";
     container.appendChild(header);
+    const listWrapper = document.createElement("div");
+    listWrapper.className = "history-scroll-wrapper";
+    listWrapper.style.cssText = "position:relative; padding-left:14px; max-height:200px; overflow-y:auto; overflow-x:hidden; scrollbar-width: none; -ms-overflow-style: none;";
+    const style = document.createElement("style");
+    style.textContent = `
+      .history-scroll-wrapper::-webkit-scrollbar { display: none; }
+    `;
+    container.appendChild(style);
+
+    const timelineLine = document.createElement("div");
+    timelineLine.className = "timeline-line";
+    timelineLine.style.cssText = "position:absolute; left:6px; top:0; bottom:0; width:1px; background:rgba(255,255,255,0.1); transform-origin:top;";
+    listWrapper.appendChild(timelineLine);
 
     const list = document.createElement("ul");
     list.className = "history-list";
-    list.style.cssText = "list-style:none;padding:0;margin:0;max-height:160px;overflow:auto";
-    container.appendChild(list);
+    list.style.cssText = "list-style:none; padding:0; margin:0;";
+
+    listWrapper.appendChild(list);
+    container.appendChild(listWrapper);
 
     const body = this.root.querySelector(".panel-body") || this.root;
     body.appendChild(container);
@@ -83,7 +101,6 @@ const PanelController = {
       this.updateInterface(val);
 
       if (this.activeSelection?.code) {
-        // mise à jour courante sans historique
         localStorage.setItem(this.activeSelection.code, val);
         this.updateGlobal();
         window.dispatchEvent(new CustomEvent("ac:updated", {
@@ -155,12 +172,25 @@ const PanelController = {
     if (this.dom.justification) this.dom.justification.value = storedNote;
 
     if (this.dom.header) this.dom.header.style.borderTopColor = resolvedColor;
-    if (this.dom.status) { this.dom.status.innerText = "EDITING"; this.dom.status.style.color = resolvedColor; }
-    if (this.dom.controls) { this.dom.controls.style.display = "block"; this.dom.controls.classList.remove("hidden"); }
-    if (this.dom.btnSave) { this.dom.btnSave.style.borderColor = resolvedColor; this.dom.btnSave.style.color = resolvedColor; this.dom.btnSave.innerText = "[ SAUVEGARDER ]"; }
+    if (this.dom.status) {
+      this.dom.status.innerText = "EDITING";
+      this.dom.status.style.color = resolvedColor;
+    }
+
+    if (this.dom.controls) {
+      this.dom.controls.style.display = "block";
+      this.dom.controls.classList.remove("hidden");
+    }
+
+    if (this.dom.btnSave) {
+      this.dom.btnSave.style.borderColor = resolvedColor;
+      this.dom.btnSave.style.color = resolvedColor;
+      this.dom.btnSave.innerText = "[ SAUVEGARDER ]";
+    }
     if (this.dom.slider) this.dom.slider.style.accentColor = resolvedColor;
 
     this.updateInterface(storedScore);
+    animatePanelOpen(this.dom);
   },
 
   _buildInfoHtml(match, name, storedScore, storedNote = "") {
@@ -213,24 +243,15 @@ const PanelController = {
     if (!this.activeSelection) return;
     const { code, color } = this.activeSelection;
     const val = Number(this.dom.slider?.value) || 0;
+
     localStorage.setItem(code, val);
     const note = this.dom.justification?.value || "";
     localStorage.setItem(code + "_note", note);
 
-    this.addHistoryEntry({ code, value: val, note, color, time: new Date().toISOString() });
+    const newEntry = { code, value: val, note, color, time: new Date().toISOString() };
+    this.addHistoryEntry(newEntry);
 
-    if (this.dom.btnSave) {
-      const originalText = this.dom.btnSave.innerText;
-      this.dom.btnSave.style.background = color;
-      this.dom.btnSave.style.color = "#000";
-      this.dom.btnSave.innerText = "SAVED";
-      setTimeout(() => {
-        this.dom.btnSave.style.background = "";
-        this.dom.btnSave.style.color = color;
-        this.dom.btnSave.innerText = originalText;
-      }, 800);
-    }
-
+    animateSaveFeedback(this.dom.btnSave, color);
     this.updateGlobal();
     window.dispatchEvent(new CustomEvent("ac:updated", { detail: { code, value: val } }));
   },
@@ -273,7 +294,7 @@ const PanelController = {
   clearHistory() {
     this.history = [];
     this.saveHistory();
-    this.renderHistory();
+    this.renderHistory(true);
   },
 
   addHistoryEntry(entry) {
@@ -281,48 +302,81 @@ const PanelController = {
     this.history.unshift(entry);
     if (this.history.length > this.maxHistory) this.history.length = this.maxHistory;
     this.saveHistory();
-    this.renderHistory();
+
+    if (!this.historyContainer) return;
+    const list = this.historyContainer.querySelector(".history-list");
+    if (!list) return;
+
+    const itemEl = this._createHistoryItemDOM(entry);
+    list.prepend(itemEl);
+    animateNewHistoryEntry(itemEl);
   },
 
-  renderHistory() {
+  renderHistory(animate = false) {
     if (!this.historyContainer) return;
+    const listWrapper = this.historyContainer.querySelector(".history-scroll-wrapper");
     const list = this.historyContainer.querySelector(".history-list");
     if (!list) return;
     list.innerHTML = "";
 
     for (const h of this.history) {
-      const li = document.createElement("li");
-      li.className = "history-item";
-      li.style.cssText = "display:flex;flex-direction:column;padding:6px 4px;border-bottom:1px solid rgba(255,255,255,0.03);font-size:0.85rem;color:#ddd";
-
-      const top = document.createElement("div");
-      top.style.cssText = "display:flex;align-items:center;gap:8px;";
-
-      const swatch = document.createElement("span");
-      swatch.style.cssText = `width:12px;height:12px;background:${h.color || "#fff"};display:inline-block;border-radius:2px;flex:0 0 12px`;
-      top.appendChild(swatch);
-
-      const title = document.createElement("span");
-      title.textContent = `${h.code} — ${h.value}mV`;
-      title.style.cssText = "font-weight:700;color:#fff";
-      top.appendChild(title);
-
-      const timeSpan = document.createElement("span");
-      timeSpan.textContent = `à ${new Date(h.time).toLocaleTimeString()}`;
-      timeSpan.style.cssText = "color:#aaa;margin-left:auto;font-size:0.8rem";
-      top.appendChild(timeSpan);
-
-      li.appendChild(top);
-
-      if (h.note) {
-        const note = document.createElement("div");
-        note.textContent = h.note;
-        note.style.cssText = "color:#bbb;white-space:pre-wrap;margin-top:6px;font-size:0.82rem";
-        li.appendChild(note);
-      }
-
-      list.appendChild(li);
+      list.appendChild(this._createHistoryItemDOM(h));
     }
+
+    if (animate) {
+      animateHistoryTimeline(listWrapper);
+    }
+  },
+
+  _createHistoryItemDOM(h) {
+    const li = document.createElement("li");
+    li.className = "history-item";
+    li.style.cssText = "position:relative; margin-bottom:12px; padding-left:12px; font-size:0.85rem; color:#ccc;";
+
+    const dot = document.createElement("div");
+    dot.style.cssText = `
+        position: absolute;
+        left: -19px;
+        top: 2px;
+        width: 9px;
+        height: 9px;
+        background-color: #111;
+        border: 2px solid ${h.color || "#fff"};
+        border-radius: 50%;
+        z-index: 2;
+        box-shadow: 0 0 5px ${h.color || "#000"};
+    `;
+    li.appendChild(dot);
+
+    const top = document.createElement("div");
+    top.style.cssText = "display:flex; align-items:center; gap:8px;";
+
+    const title = document.createElement("span");
+    title.textContent = `${h.code}`;
+    title.style.cssText = "font-weight:700; color:#fff;";
+    top.appendChild(title);
+
+    const valBadge = document.createElement("span");
+    valBadge.textContent = `${h.value}mV`;
+    valBadge.style.cssText = `font-family:monospace; color:${h.color}; font-size:0.8rem;`;
+    top.appendChild(valBadge);
+
+    const timeSpan = document.createElement("span");
+    const date = new Date(h.time);
+    timeSpan.textContent = `${date.getHours()}:${String(date.getMinutes()).padStart(2, '0')}`;
+    timeSpan.style.cssText = "color:#555; margin-left:auto; font-size:0.75rem;";
+    top.appendChild(timeSpan);
+
+    li.appendChild(top);
+
+    if (h.note) {
+      const note = document.createElement("div");
+      note.textContent = h.note;
+      note.style.cssText = "color:#888; white-space:pre-wrap; margin-top:4px; font-size:0.8rem; border-left:2px solid #333; padding-left:6px; margin-left:2px;";
+      li.appendChild(note);
+    }
+
+    return li;
   }
 };
 
