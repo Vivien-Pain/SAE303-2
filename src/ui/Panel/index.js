@@ -1,3 +1,4 @@
+// javascript
 import { htmlToDOM } from "../../lib/utils.js";
 import template from "./template.html?raw";
 
@@ -17,12 +18,21 @@ const PanelController = {
   root: null,
   acData: null,
 
+  // historique
+  history: [],
+  maxHistory: 100,
+  historyContainer: null,
+  HISTORY_KEY: 'ac_history',
+
   init(root, acData = null) {
     this.root = root;
     this.acData = acData;
     this.dom = this._getDom(root);
+    this._ensureHistoryContainer();
+    this.loadHistory();
     this._bindEvents();
     this.updateGlobal();
+    this.renderHistory();
   },
 
   _getDom(root) {
@@ -42,14 +52,42 @@ const PanelController = {
     };
   },
 
+  _ensureHistoryContainer() {
+    if (!this.root) return;
+    this.historyContainer = this.root.querySelector("#ac-history");
+    if (this.historyContainer) return;
+
+    const container = document.createElement("div");
+    container.id = "ac-history";
+    container.className = "ac-history";
+    container.style.cssText = "margin-top:12px;border-top:1px solid rgba(255,255,255,0.03);padding-top:8px;";
+
+    const header = document.createElement("div");
+    header.className = "history-header";
+    header.textContent = "HISTORIQUE";
+    header.style.cssText = "font-weight:700;margin:4px 0;color:#ccc;font-size:0.85rem";
+    container.appendChild(header);
+
+    const list = document.createElement("ul");
+    list.className = "history-list";
+    list.style.cssText = "list-style:none;padding:0;margin:0;max-height:160px;overflow:auto";
+    container.appendChild(list);
+
+    const body = this.root.querySelector(".panel-body") || this.root;
+    body.appendChild(container);
+    this.historyContainer = container;
+  },
+
   _bindEvents() {
     this.dom.slider?.addEventListener("input", e => {
       const val = Number(e.target.value);
       this.updateInterface(val);
 
       if (this.activeSelection?.code) {
+        // mettre à jour la valeur courante en localStorage, mais NE PAS ajouter à l'historique ici
         localStorage.setItem(this.activeSelection.code, val);
         this.updateGlobal();
+
         window.dispatchEvent(new CustomEvent('ac:updated', {
           detail: { code: this.activeSelection.code, value: val }
         }));
@@ -69,10 +107,12 @@ const PanelController = {
     const data = acData || this.acData;
     if (!data || !code) return null;
 
+    const codeNorm = String(code).toUpperCase().trim();
+
     for (const group of Object.values(data)) {
       if (!group?.niveaux) continue;
       for (const niveau of group.niveaux) {
-        const ac = niveau.acs?.find(ac => ac.code === code);
+        const ac = niveau.acs?.find(ac => String(ac?.code || '').toUpperCase().trim() === codeNorm);
         if (ac) return { group, niveau, ac };
       }
     }
@@ -96,16 +136,17 @@ const PanelController = {
   },
 
   selectNode(code, color = "#8a2be2", element = null, acData = null) {
-    const storedScore = Number(localStorage.getItem(code)) || 0;
-    const storedNote = localStorage.getItem(code + "_note") || "";
+    const codeNorm = String(code).toUpperCase().trim();
+    const storedScore = Number(localStorage.getItem(codeNorm)) || 0;
+    const storedNote = localStorage.getItem(codeNorm + "_note") || "";
     const name = element?.querySelector?.('title')?.textContent?.trim() ||
         element?.querySelector?.('.label')?.textContent?.trim() ||
-        element?.dataset?.name || code;
+        element?.dataset?.name || codeNorm;
 
-    const match = this.findAC(code, acData);
+    const match = this.findAC(codeNorm, acData);
     const resolvedColor = this.resolveColor(color, element, match);
 
-    this.activeSelection = { code, element, color: resolvedColor };
+    this.activeSelection = { code: codeNorm, element, color: resolvedColor };
 
     if (this.dom.display) {
       Object.assign(this.dom.display.style, {
@@ -188,6 +229,15 @@ const PanelController = {
     const note = this.dom.justification?.value || "";
     localStorage.setItem(code + "_note", note);
 
+    // enregistrer aussi dans l'historique au moment du save
+    this.addHistoryEntry({
+      code,
+      value: val,
+      note,
+      color,
+      time: new Date().toISOString()
+    });
+
     if (this.dom.btnSave) {
       const originalText = this.dom.btnSave.innerText;
       Object.assign(this.dom.btnSave.style, { background: color, color: "#000" });
@@ -204,11 +254,16 @@ const PanelController = {
   },
 
   updateGlobal() {
-    const nodes = Array.from(this.root?.querySelectorAll("[id^='AC']") || []);
-    const acKeys = nodes.length ?
-        nodes.map(n => n.id) :
+    const nodesAll = Array.from(this.root?.querySelectorAll("*") || []);
+    const acNodes = nodesAll.filter(n => {
+      const idOrData = String(n.id || n.dataset?.code || "");
+      return /AC\d+/i.test(idOrData);
+    });
+
+    const acKeys = acNodes.length ?
+        acNodes.map(n => String(n.id || n.dataset?.code || "").toUpperCase()) :
         Array.from({ length: localStorage.length }, (_, i) => localStorage.key(i))
-            .filter(k => k?.startsWith('AC'));
+            .filter(k => /^AC/i.test(k));
 
     const total = acKeys.reduce((sum, key) => sum + (Number(localStorage.getItem(key)) || 0), 0);
     const average = acKeys.length ? Math.round(total / acKeys.length) : 0;
@@ -220,6 +275,82 @@ const PanelController = {
         backgroundColor: average === 100 ? "#00ff41" : "#fff"
       });
     }
+  },
+
+  loadHistory() {
+    try {
+      const raw = localStorage.getItem(this.HISTORY_KEY);
+      this.history = raw ? JSON.parse(raw) : [];
+      if (!Array.isArray(this.history)) this.history = [];
+      if (this.history.length > this.maxHistory) this.history.length = this.maxHistory;
+    } catch (e) {
+      this.history = [];
+      console.warn("Impossible de charger l'historique:", e);
+    }
+  },
+
+  saveHistory() {
+    try {
+      localStorage.setItem(this.HISTORY_KEY, JSON.stringify(this.history.slice(0, this.maxHistory)));
+    } catch (e) {
+      console.warn("Impossible de sauvegarder l'historique:", e);
+    }
+  },
+
+  clearHistory() {
+    this.history = [];
+    this.saveHistory();
+    this.renderHistory();
+  },
+
+  addHistoryEntry(entry) {
+    if (!entry || !entry.code) return;
+    this.history.unshift(entry);
+    if (this.history.length > this.maxHistory) this.history.length = this.maxHistory;
+    this.saveHistory();
+    this.renderHistory();
+  },
+
+  renderHistory() {
+    if (!this.historyContainer) return;
+    const list = this.historyContainer.querySelector(".history-list");
+    if (!list) return;
+    list.innerHTML = "";
+
+    this.history.forEach(h => {
+      const li = document.createElement("li");
+      li.className = "history-item";
+      li.style.cssText = "display:flex;flex-direction:column;padding:6px 4px;border-bottom:1px solid rgba(255,255,255,0.03);font-size:0.85rem;color:#ddd";
+
+      const top = document.createElement("div");
+      top.style.cssText = "display:flex;align-items:center;gap:8px;";
+
+      const swatch = document.createElement("span");
+      swatch.style.cssText = `width:12px;height:12px;background:${h.color || '#fff'};display:inline-block;border-radius:2px;flex:0 0 12px`;
+      top.appendChild(swatch);
+
+      const title = document.createElement("span");
+      const time = new Date(h.time);
+      title.textContent = `${h.code} — ${h.value}mV`;
+      title.style.cssText = "font-weight:700;color:#fff";
+      top.appendChild(title);
+
+      const timeSpan = document.createElement("span");
+      timeSpan.textContent = `à ${time.toLocaleTimeString()}`;
+      timeSpan.style.cssText = "color:#aaa;margin-left:auto;font-size:0.8rem";
+      top.appendChild(timeSpan);
+
+      li.appendChild(top);
+
+      if (h.note) {
+        const note = document.createElement("div");
+        note.textContent = h.note;
+        note.style.cssText = "color:#bbb;white-space:pre-wrap;margin-top:6px;font-size:0.82rem";
+        li.appendChild(note);
+      }
+
+      list.appendChild(li);
+    });
   }
 };
 

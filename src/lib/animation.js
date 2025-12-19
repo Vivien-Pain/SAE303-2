@@ -1,75 +1,54 @@
-// `src/lib/animation.js`
 import { gsap } from 'gsap';
-const GREY = '#6f7a84';
-
-export function animateRamSegment(seg, lit, color, duration = 0.35) {
-  const c = lit ? (color || '#00ff41') : GREY;
-  gsap.to(seg, {
-    duration,
-    backgroundColor: c,
-    fill: c,
-    opacity: 1,
-    ease: 'power1.out'
-  });
-}
 
 export function animateFan(el, litCount = 0, total = 1, opts = {}) {
-  if (!el) {
-    console.error('[animateFan] Élément null/undefined');
-    return;
-  }
+  if (!el) return;
 
-  let targets = el.querySelectorAll('[id^="pale"]');
-  if (targets.length === 0) {
-    console.warn('[animateFan] Aucune pale trouvée, abandon');
-    return;
-  }
+  const targets = el.querySelectorAll('[id^="pale"]');
+  if (!targets.length) return;
 
   if (!el._fanInit) {
-    const grandRond = el.querySelector('#GrandRond');
     gsap.set(targets, {
       transformOrigin: "center",
       svgOrigin: "383.75 1489.75"
     });
-
     el._fanInit = true;
   }
-
   const safeTotal = Math.max(1, total);
   const safeLit = Math.max(0, litCount);
   const ratio = Math.min(1, safeLit / safeTotal);
-
-  const minDur = opts.minDuration || 1.5;
-  const maxDur = opts.maxDuration || 5.0;
-  const targetDuration = maxDur - (ratio * (maxDur - minDur));
+  const baseDuration = opts.baseDuration ?? 2;
+  const maxSpeed = opts.maxSpeed ?? 4;
+  const accelPower = opts.accelPower ?? 2;
+  const adjRatio = Math.pow(ratio, accelPower);
+  const targetTimeScale = adjRatio * maxSpeed;
 
   if (!el._fanTween) {
     el._fanTween = gsap.to(targets, {
       rotation: 360,
-      duration: targetDuration,
+      duration: baseDuration,
       repeat: -1,
-      ease: 'none',
+      ease: "none",
       paused: true
     });
   }
+
   if (safeLit === 0) {
-    if (el._fanTween.isActive()) {
-      gsap.to(el._fanTween, {
-        timeScale: 0,
-        duration: 1.5,
-        onComplete: () => el._fanTween.pause()
-      });
-    }
-  } else {
-    if (el._fanTween.paused() || el._fanTween.timeScale() === 0) {
-      el._fanTween.play();
-      gsap.to(el._fanTween, { timeScale: 1, duration: 0.5 });
-    }
-    if (Math.abs(el._fanTween.duration() - targetDuration) > 0.05) {
-      el._fanTween.duration(targetDuration);
-    }
+    gsap.to(el._fanTween, {
+      timeScale: 0,
+      duration: 1,
+      onComplete: () => el._fanTween.pause()
+    });
+  }
+  else {
+    el._fanTween.play();
+    gsap.to(el._fanTween, {
+      timeScale: Math.max(0.1, targetTimeScale),
+      duration: 0.4,
+      ease: "power2.out"
+    });
   }
 }
+
 
 export function typeWriter(element, text, speed = 20) {
   return new Promise((resolve) => {
@@ -94,6 +73,7 @@ export function bootSequence(container) {
     "> LOADING KERNEL...",
     "> CHECKING MEMORY... OK",
     "> LOADING ASSETS...",
+    "> INITIALIZING MMI MODULE...",
     "> SYSTEM READY."
   ];
 
@@ -107,7 +87,6 @@ export function bootSequence(container) {
   };
 }
 
-/* Nouvelle fonction exportée pour gérer l'overlay de boot et la suppression */
 export async function startBootSequence(rootPage, opts = {}) {
   if (!rootPage) return;
   const bootOverlay = rootPage.querySelector('.boot-screen');
