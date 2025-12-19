@@ -1,4 +1,3 @@
-// javascript
 import { htmlToDOM } from "../../lib/utils.js";
 import template from "./template.html?raw";
 
@@ -6,23 +5,20 @@ class PanelView {
   constructor() {
     this.root = htmlToDOM(template);
   }
-
   dom() {
     return this.root;
   }
 }
-
 const PanelController = {
   dom: {},
   activeSelection: null,
   root: null,
   acData: null,
 
-  // historique
   history: [],
   maxHistory: 100,
   historyContainer: null,
-  HISTORY_KEY: 'ac_history',
+  HISTORY_KEY: "ac_history",
 
   init(root, acData = null) {
     this.root = root;
@@ -54,8 +50,11 @@ const PanelController = {
 
   _ensureHistoryContainer() {
     if (!this.root) return;
-    this.historyContainer = this.root.querySelector("#ac-history");
-    if (this.historyContainer) return;
+    const existing = this.root.querySelector("#ac-history");
+    if (existing) {
+      this.historyContainer = existing;
+      return;
+    }
 
     const container = document.createElement("div");
     container.id = "ac-history";
@@ -84,11 +83,10 @@ const PanelController = {
       this.updateInterface(val);
 
       if (this.activeSelection?.code) {
-        // mettre à jour la valeur courante en localStorage, mais NE PAS ajouter à l'historique ici
+        // mise à jour courante sans historique
         localStorage.setItem(this.activeSelection.code, val);
         this.updateGlobal();
-
-        window.dispatchEvent(new CustomEvent('ac:updated', {
+        window.dispatchEvent(new CustomEvent("ac:updated", {
           detail: { code: this.activeSelection.code, value: val }
         }));
       }
@@ -106,13 +104,12 @@ const PanelController = {
   findAC(code, acData = null) {
     const data = acData || this.acData;
     if (!data || !code) return null;
-
     const codeNorm = String(code).toUpperCase().trim();
 
     for (const group of Object.values(data)) {
       if (!group?.niveaux) continue;
       for (const niveau of group.niveaux) {
-        const ac = niveau.acs?.find(ac => String(ac?.code || '').toUpperCase().trim() === codeNorm);
+        const ac = (niveau.acs || []).find(a => String(a?.code || "").toUpperCase().trim() === codeNorm);
         if (ac) return { group, niveau, ac };
       }
     }
@@ -121,27 +118,27 @@ const PanelController = {
 
   resolveColor(defaultColor, element = null, match = null) {
     if (element?.dataset?.color) return element.dataset.color;
-
     if (match?.group) {
       const colorMap = {
-        comprendre: '#ff77d1', concevoir: '#ffd700', exprimer: '#8a2be2',
-        développer: '#00ff41', entreprendre: '#06D1FF'
+        comprendre: "#ff77d1",
+        concevoir: "#ffd700",
+        exprimer: "#8a2be2",
+        développer: "#00ff41",
+        entreprendre: "#06D1FF"
       };
-      const label = match.group.libelle_long?.toLowerCase() || '';
-      for (const [key, color] of Object.entries(colorMap)) {
-        if (label.includes(key)) return color;
-      }
+      const label = (match.group.libelle_long || "").toLowerCase();
+      for (const [k, v] of Object.entries(colorMap)) if (label.includes(k)) return v;
     }
-    return defaultColor || '#00ff41';
+    return defaultColor || "#00ff41";
   },
 
   selectNode(code, color = "#8a2be2", element = null, acData = null) {
     const codeNorm = String(code).toUpperCase().trim();
     const storedScore = Number(localStorage.getItem(codeNorm)) || 0;
     const storedNote = localStorage.getItem(codeNorm + "_note") || "";
-    const name = element?.querySelector?.('title')?.textContent?.trim() ||
-        element?.querySelector?.('.label')?.textContent?.trim() ||
-        element?.dataset?.name || codeNorm;
+    const name = element?.querySelector?.("title")?.textContent?.trim()
+        || element?.querySelector?.(".label")?.textContent?.trim()
+        || element?.dataset?.name || codeNorm;
 
     const match = this.findAC(codeNorm, acData);
     const resolvedColor = this.resolveColor(color, element, match);
@@ -149,25 +146,18 @@ const PanelController = {
     this.activeSelection = { code: codeNorm, element, color: resolvedColor };
 
     if (this.dom.display) {
-      Object.assign(this.dom.display.style, {
-        color: resolvedColor,
-        borderColor: resolvedColor
-      });
+      this.dom.display.style.color = resolvedColor;
+      this.dom.display.style.borderColor = resolvedColor;
       this.dom.display.innerHTML = this._buildInfoHtml(match, name, storedScore, storedNote);
     }
 
     if (this.dom.slider) this.dom.slider.value = storedScore;
     if (this.dom.justification) this.dom.justification.value = storedNote;
 
-    Object.assign(this.dom.header?.style || {}, { borderTopColor: resolvedColor });
-    Object.assign(this.dom.status || {}, { innerText: "EDITING", style: { color: resolvedColor } });
-    Object.assign(this.dom.controls?.style || {}, { display: "block" });
-    this.dom.controls?.classList.remove("hidden");
-    Object.assign(this.dom.btnSave?.style || {}, {
-      borderColor: resolvedColor,
-      color: resolvedColor
-    });
-    if (this.dom.btnSave) this.dom.btnSave.innerText = "[ SAUVEGARDER ]";
+    if (this.dom.header) this.dom.header.style.borderTopColor = resolvedColor;
+    if (this.dom.status) { this.dom.status.innerText = "EDITING"; this.dom.status.style.color = resolvedColor; }
+    if (this.dom.controls) { this.dom.controls.style.display = "block"; this.dom.controls.classList.remove("hidden"); }
+    if (this.dom.btnSave) { this.dom.btnSave.style.borderColor = resolvedColor; this.dom.btnSave.style.color = resolvedColor; this.dom.btnSave.innerText = "[ SAUVEGARDER ]"; }
     if (this.dom.slider) this.dom.slider.style.accentColor = resolvedColor;
 
     this.updateInterface(storedScore);
@@ -176,7 +166,7 @@ const PanelController = {
   _buildInfoHtml(match, name, storedScore, storedNote = "") {
     const parts = [
       `<div class="info-row"><span class="info-label">ID</span> <span class="info-val">${name}</span></div>`,
-      `<div class="info-row"><span class="info-label">NOM</span> <span class="info-val">${match?.ac.libelle || ''}</span></div>`,
+      `<div class="info-row"><span class="info-label">NOM</span> <span class="info-val">${match?.ac?.libelle || ""}</span></div>`,
       `<hr style="border:0; border-top:1px dashed #333; margin:10px 0;">`
     ];
 
@@ -187,7 +177,7 @@ const PanelController = {
       );
 
       if (match.group.composantes_essentielles?.length) {
-        const items = match.group.composantes_essentielles.map(s => `<li>${s}</li>`).join('');
+        const items = match.group.composantes_essentielles.map(s => `<li>${s}</li>`).join("");
         parts.push(
             `<hr style="border:0; border-top:1px dashed #333; margin:10px 0;">`,
             `<div style="font-size:0.85rem; color:#aaa;"><strong>Composantes Essentielles :</strong><ul>${items}</ul></div>`
@@ -212,7 +202,7 @@ const PanelController = {
         `<div>${storedScore === 100 ? "COMPÉTENCE VALIDÉE." : "ACQUISITION EN COURS..."}</div>`
     );
 
-    return parts.join('');
+    return parts.join("");
   },
 
   updateInterface(val) {
@@ -221,59 +211,45 @@ const PanelController = {
 
   saveData() {
     if (!this.activeSelection) return;
-
     const { code, color } = this.activeSelection;
     const val = Number(this.dom.slider?.value) || 0;
     localStorage.setItem(code, val);
-
     const note = this.dom.justification?.value || "";
     localStorage.setItem(code + "_note", note);
 
-    // enregistrer aussi dans l'historique au moment du save
-    this.addHistoryEntry({
-      code,
-      value: val,
-      note,
-      color,
-      time: new Date().toISOString()
-    });
+    this.addHistoryEntry({ code, value: val, note, color, time: new Date().toISOString() });
 
     if (this.dom.btnSave) {
       const originalText = this.dom.btnSave.innerText;
-      Object.assign(this.dom.btnSave.style, { background: color, color: "#000" });
+      this.dom.btnSave.style.background = color;
+      this.dom.btnSave.style.color = "#000";
       this.dom.btnSave.innerText = "SAVED";
-
       setTimeout(() => {
-        Object.assign(this.dom.btnSave.style, { background: "#111", color });
+        this.dom.btnSave.style.background = "";
+        this.dom.btnSave.style.color = color;
         this.dom.btnSave.innerText = originalText;
       }, 800);
     }
 
     this.updateGlobal();
-    window.dispatchEvent(new CustomEvent('ac:updated', { detail: { code, value: val } }));
+    window.dispatchEvent(new CustomEvent("ac:updated", { detail: { code, value: val } }));
   },
 
   updateGlobal() {
     const nodesAll = Array.from(this.root?.querySelectorAll("*") || []);
-    const acNodes = nodesAll.filter(n => {
-      const idOrData = String(n.id || n.dataset?.code || "");
-      return /AC\d+/i.test(idOrData);
-    });
+    const acNodes = nodesAll.filter(n => /AC\d+/i.test(String(n.id || n.dataset?.code || "")));
 
-    const acKeys = acNodes.length ?
-        acNodes.map(n => String(n.id || n.dataset?.code || "").toUpperCase()) :
-        Array.from({ length: localStorage.length }, (_, i) => localStorage.key(i))
-            .filter(k => /^AC/i.test(k));
+    const acKeys = acNodes.length
+        ? acNodes.map(n => String(n.id || n.dataset?.code || "").toUpperCase())
+        : Array.from({ length: localStorage.length }, (_, i) => localStorage.key(i)).filter(k => /^AC/i.test(k));
 
     const total = acKeys.reduce((sum, key) => sum + (Number(localStorage.getItem(key)) || 0), 0);
     const average = acKeys.length ? Math.round(total / acKeys.length) : 0;
 
     if (this.dom.globalScore) this.dom.globalScore.innerText = average + "mV";
     if (this.dom.globalBar) {
-      Object.assign(this.dom.globalBar.style, {
-        width: average + "mV",
-        backgroundColor: average === 100 ? "#00ff41" : "#fff"
-      });
+      this.dom.globalBar.style.width = average + "mV";
+      this.dom.globalBar.style.backgroundColor = average === 100 ? "#00ff41" : "#fff";
     }
   },
 
@@ -283,18 +259,15 @@ const PanelController = {
       this.history = raw ? JSON.parse(raw) : [];
       if (!Array.isArray(this.history)) this.history = [];
       if (this.history.length > this.maxHistory) this.history.length = this.maxHistory;
-    } catch (e) {
+    } catch {
       this.history = [];
-      console.warn("Impossible de charger l'historique:", e);
     }
   },
 
   saveHistory() {
     try {
       localStorage.setItem(this.HISTORY_KEY, JSON.stringify(this.history.slice(0, this.maxHistory)));
-    } catch (e) {
-      console.warn("Impossible de sauvegarder l'historique:", e);
-    }
+    } catch {}
   },
 
   clearHistory() {
@@ -304,7 +277,7 @@ const PanelController = {
   },
 
   addHistoryEntry(entry) {
-    if (!entry || !entry.code) return;
+    if (!entry?.code) return;
     this.history.unshift(entry);
     if (this.history.length > this.maxHistory) this.history.length = this.maxHistory;
     this.saveHistory();
@@ -317,7 +290,7 @@ const PanelController = {
     if (!list) return;
     list.innerHTML = "";
 
-    this.history.forEach(h => {
+    for (const h of this.history) {
       const li = document.createElement("li");
       li.className = "history-item";
       li.style.cssText = "display:flex;flex-direction:column;padding:6px 4px;border-bottom:1px solid rgba(255,255,255,0.03);font-size:0.85rem;color:#ddd";
@@ -326,17 +299,16 @@ const PanelController = {
       top.style.cssText = "display:flex;align-items:center;gap:8px;";
 
       const swatch = document.createElement("span");
-      swatch.style.cssText = `width:12px;height:12px;background:${h.color || '#fff'};display:inline-block;border-radius:2px;flex:0 0 12px`;
+      swatch.style.cssText = `width:12px;height:12px;background:${h.color || "#fff"};display:inline-block;border-radius:2px;flex:0 0 12px`;
       top.appendChild(swatch);
 
       const title = document.createElement("span");
-      const time = new Date(h.time);
       title.textContent = `${h.code} — ${h.value}mV`;
       title.style.cssText = "font-weight:700;color:#fff";
       top.appendChild(title);
 
       const timeSpan = document.createElement("span");
-      timeSpan.textContent = `à ${time.toLocaleTimeString()}`;
+      timeSpan.textContent = `à ${new Date(h.time).toLocaleTimeString()}`;
       timeSpan.style.cssText = "color:#aaa;margin-left:auto;font-size:0.8rem";
       top.appendChild(timeSpan);
 
@@ -350,7 +322,7 @@ const PanelController = {
       }
 
       list.appendChild(li);
-    });
+    }
   }
 };
 
