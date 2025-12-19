@@ -1,4 +1,3 @@
-<!-- html -->
 <aside id="panel">
     <div class="panel-header">
         <h2 class="panel-title">MODULE INFO</h2>
@@ -22,20 +21,25 @@
 
             <input type="range" id="score-slider" min="0" max="100" step="25" />
 
-            <!-- Champ de justification avec classes -->
             <div class="info-row justification-row">
                 <label for="justification" class="justification-label">JUSTIFICATION (courte)</label>
                 <textarea id="justification" class="justification-input" rows="3" placeholder="Expliquez brièvement ce que vous avez fait..."></textarea>
             </div>
 
-            <br /><br />
-            <button class="btn-bios" id="btn-save">
-                [ INITIALISER ]
-            </button>
+            <div style="margin-top: 25px; display: flex; flex-direction: column; gap: 10px;">
+                <button class="btn-bios" id="btn-save" style="width: 100%;">
+                    [ INITIALISER ]
+                </button>
+                <button class="btn-bios" id="btn-json" style="width: 100%; border-color: #06D1FF; color: #06D1FF;">
+                    [ EXPORT JSON ]
+                </button>
+            </div>
         </div>
     </div>
 
     <div class="panel-footer">
+        <div id="competence-list" style="margin-bottom: 15px; border-bottom: 1px dashed #333; padding-bottom: 10px;"></div>
+
         <div class="info-row">
             <span style="color: #666">GLOBAL COMPLETION</span>
             <span id="global-score" style="color: #fff">0%</span>

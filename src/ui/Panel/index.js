@@ -45,8 +45,10 @@ const PanelController = {
       slider: q("#score-slider"),
       scoreVal: q("#score-val"),
       btnSave: q("#btn-save"),
+      btnJson: q("#btn-json"),
       globalScore: q("#global-score"),
       globalBar: q("#global-bar"),
+      competenceList: q("#competence-list"),
       justification: q("#justification")
     };
   },
@@ -72,10 +74,9 @@ const PanelController = {
     const listWrapper = document.createElement("div");
     listWrapper.className = "history-scroll-wrapper";
     listWrapper.style.cssText = "position:relative; padding-left:14px; max-height:200px; overflow-y:auto; overflow-x:hidden; scrollbar-width: none; -ms-overflow-style: none;";
+
     const style = document.createElement("style");
-    style.textContent = `
-      .history-scroll-wrapper::-webkit-scrollbar { display: none; }
-    `;
+    style.textContent = `.history-scroll-wrapper::-webkit-scrollbar { display: none; }`;
     container.appendChild(style);
 
     const timelineLine = document.createElement("div");
@@ -116,6 +117,11 @@ const PanelController = {
     });
 
     this.dom.btnSave?.addEventListener("click", () => this.saveData());
+
+    this.dom.btnJson?.addEventListener("click", (e) => {
+      e.preventDefault();
+      window.location.href = "/json";
+    });
   },
 
   findAC(code, acData = null) {
@@ -154,8 +160,8 @@ const PanelController = {
     const storedScore = Number(localStorage.getItem(codeNorm)) || 0;
     const storedNote = localStorage.getItem(codeNorm + "_note") || "";
     const name = element?.querySelector?.("title")?.textContent?.trim()
-        || element?.querySelector?.(".label")?.textContent?.trim()
-        || element?.dataset?.name || codeNorm;
+      || element?.querySelector?.(".label")?.textContent?.trim()
+      || element?.dataset?.name || codeNorm;
 
     const match = this.findAC(codeNorm, acData);
     const resolvedColor = this.resolveColor(color, element, match);
@@ -202,15 +208,15 @@ const PanelController = {
 
     if (match) {
       parts.push(
-          `<div class="info-row"><span class="info-label">COMPÉTENCE</span> <span class="info-val">${match.group.libelle_long}</span></div>`,
-          `<div class="info-row"><span class="info-label">ANNÉE</span> <span class="info-val">${match.niveau.annee}</span></div>`
+        `<div class="info-row"><span class="info-label">COMPÉTENCE</span> <span class="info-val">${match.group.libelle_long}</span></div>`,
+        `<div class="info-row"><span class="info-label">ANNÉE</span> <span class="info-val">${match.niveau.annee}</span></div>`
       );
 
       if (match.group.composantes_essentielles?.length) {
         const items = match.group.composantes_essentielles.map(s => `<li>${s}</li>`).join("");
         parts.push(
-            `<hr style="border:0; border-top:1px dashed #333; margin:10px 0;">`,
-            `<div style="font-size:0.85rem; color:#aaa;"><strong>Composantes Essentielles :</strong><ul>${items}</ul></div>`
+          `<hr style="border:0; border-top:1px dashed #333; margin:10px 0;">`,
+          `<div style="font-size:0.85rem; color:#aaa;"><strong>Composantes Essentielles :</strong><ul>${items}</ul></div>`
         );
       }
     } else {
@@ -219,17 +225,17 @@ const PanelController = {
 
     if (storedNote) {
       parts.push(
-          `<hr>`,
-          `<div class="info-row justification-display-row">`,
-          `<span class="info-label">JUSTIFICATION</span>`,
-          `<div class="info-val justification-display" style="white-space:pre-wrap;">${storedNote}</div>`,
-          `</div>`
+        `<hr>`,
+        `<div class="info-row justification-display-row">`,
+        `<span class="info-label">JUSTIFICATION</span>`,
+        `<div class="info-val justification-display" style="white-space:pre-wrap;">${storedNote}</div>`,
+        `</div>`
       );
     }
 
     parts.push(
-        `<hr>`,
-        `<div>${storedScore === 100 ? "COMPÉTENCE VALIDÉE." : "ACQUISITION EN COURS..."}</div>`
+      `<hr>`,
+      `<div>${storedScore === 100 ? "COMPÉTENCE VALIDÉE." : "ACQUISITION EN COURS..."}</div>`
     );
 
     return parts.join("");
@@ -257,21 +263,80 @@ const PanelController = {
   },
 
   updateGlobal() {
-    const nodesAll = Array.from(this.root?.querySelectorAll("*") || []);
-    const acNodes = nodesAll.filter(n => /AC\d+/i.test(String(n.id || n.dataset?.code || "")));
+    if (!this.acData) return;
 
-    const acKeys = acNodes.length
-        ? acNodes.map(n => String(n.id || n.dataset?.code || "").toUpperCase())
-        : Array.from({ length: localStorage.length }, (_, i) => localStorage.key(i)).filter(k => /^AC/i.test(k));
+    let globalSum = 0;
+    let globalCount = 0;
+    const competenceStats = [];
 
-    const total = acKeys.reduce((sum, key) => sum + (Number(localStorage.getItem(key)) || 0), 0);
-    const average = acKeys.length ? Math.round(total / acKeys.length) : 0;
+    for (const group of Object.values(this.acData)) {
+      let groupSum = 0;
+      let groupCount = 0;
 
-    if (this.dom.globalScore) this.dom.globalScore.innerText = average + "mV";
-    if (this.dom.globalBar) {
-      this.dom.globalBar.style.width = average + "mV";
-      this.dom.globalBar.style.backgroundColor = average === 100 ? "#00ff41" : "#fff";
+      if (group.niveaux) {
+        group.niveaux.forEach(niveau => {
+          if (niveau.acs) {
+            niveau.acs.forEach(ac => {
+              const val = Number(localStorage.getItem(ac.code)) || 0;
+              groupSum += val;
+              groupCount++;
+            });
+          }
+        });
+      }
+
+      if (groupCount > 0) {
+        const avg = Math.round(groupSum / groupCount);
+        const color = this.resolveColor(null, null, { group });
+        const name = group.nom_court || group.libelle_long;
+
+        competenceStats.push({ name, avg, color });
+
+        globalSum += groupSum;
+        globalCount += groupCount;
+      }
     }
+
+    const globalAvg = globalCount ? Math.round(globalSum / globalCount) : 0;
+
+    if (this.dom.globalScore) this.dom.globalScore.innerText = globalAvg + "%";
+    if (this.dom.globalBar) {
+      this.dom.globalBar.style.width = globalAvg + "%";
+      this.dom.globalBar.style.backgroundColor = globalAvg === 100 ? "#00ff41" : "#fff";
+    }
+
+    this.renderCompetenceStats(competenceStats);
+  },
+
+  renderCompetenceStats(stats) {
+    if (!this.dom.competenceList) return;
+    this.dom.competenceList.innerHTML = "";
+
+    stats.forEach(stat => {
+      const row = document.createElement("div");
+      row.style.cssText = "display: flex; align-items: center; margin-bottom: 6px; font-size: 0.75rem; color: #aaa;";
+
+      const label = document.createElement("div");
+      label.textContent = stat.name;
+      label.style.cssText = "width: 80px; overflow: hidden; text-overflow: ellipsis; white-space: nowrap;";
+
+      const track = document.createElement("div");
+      track.style.cssText = "flex: 1; height: 4px; background: rgba(255,255,255,0.1); margin: 0 8px; position: relative;";
+
+      const bar = document.createElement("div");
+      bar.style.cssText = `position: absolute; left: 0; top: 0; bottom: 0; width: ${stat.avg}%; background-color: ${stat.color}; transition: width 0.3s ease;`;
+
+      const val = document.createElement("div");
+      val.textContent = stat.avg + "%";
+      val.style.cssText = "width: 30px; text-align: right; color: #fff; font-family: monospace;";
+
+      track.appendChild(bar);
+      row.appendChild(label);
+      row.appendChild(track);
+      row.appendChild(val);
+
+      this.dom.competenceList.appendChild(row);
+    });
   },
 
   loadHistory() {
